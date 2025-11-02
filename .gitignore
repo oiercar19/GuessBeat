@@ -35,7 +35,6 @@ pids
 *.pid.lock
 
 # Archivos de lock si usas varios gestores
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
@@ -74,7 +73,6 @@ services/*/pids/
 data/
 dump/
 *.bson
-*.json
 *.lock
 
 # =========================
