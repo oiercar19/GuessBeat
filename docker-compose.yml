@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+  # 🧱 Base de datos MongoDB
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  # 🚀 Microservicio de usuarios
+  user-service:
+    build: ./services/user-service
+    container_name: user-service
+    restart: always
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - MONGO_URI=mongodb://mongo:27017/guessbeat
+      - JWT_SECRET=${JWT_SECRET}
+      - SOUNDCLOUD_CLIENT_ID=${SOUNDCLOUD_CLIENT_ID}
+      - SOUNDCLOUD_CLIENT_SECRET=${SOUNDCLOUD_CLIENT_SECRET}
+      - SOUNDCLOUD_REDIRECT_URI=${SOUNDCLOUD_REDIRECT_URI}
+    depends_on:
+      - mongo
+
+  # 🌐 API Gateway
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - USER_SERVICE_URL=http://user-service:5001
+    depends_on:
+      - user-service
+
+  # 💻 Frontend
+  frontend:
+    build: ./frontend
+    container_name: guessbeat-frontend
+    restart: always
+    ports:
+      - "5173:80"
+    depends_on:
+      - api-gateway
+
+volumes:
+  mongo-data:
