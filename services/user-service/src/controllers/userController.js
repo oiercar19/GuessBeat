@@ -48,3 +48,16 @@ export const getProfile = async (req, res) => {
   if (user) res.json(user);
   else res.status(404).json({ message: "Usuario no encontrado" });
 };
+
+export const getRanking = async (req, res) => {
+  try {
+    const users = await User.find({}, "username stats")
+      .sort({ stats: -1 })
+      .limit(20); // top 20 jugadores
+
+    res.json(users);
+  } catch (error) {
+    console.error("❌ Error al obtener ranking:", error);
+    res.status(500).json({ message: "Error al obtener ranking" });
+  }
+};

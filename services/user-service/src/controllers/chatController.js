@@ -7,7 +7,7 @@ export const getChatMessages = async (req, res) => {
   try {
     const messages = await ChatMessage.find()
       .populate("user", "username")
-      .sort({ timestamp: 1 }); // más antiguos primero
+      .sort({ timestamp: -1 }); // más nuevos primero
 
     res.status(200).json(messages);
   } catch (error) {

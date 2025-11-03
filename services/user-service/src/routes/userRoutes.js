@@ -1,5 +1,5 @@
 import express from "express";
-import { registerUser, loginUser, getProfile } from "../controllers/userController.js";
+import { registerUser, loginUser, getProfile, getRanking } from "../controllers/userController.js";
 import { protect } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
@@ -69,5 +69,17 @@ router.post("/login", loginUser);
  *         description: Token inválido o ausente
  */
 router.get("/profile", protect, getProfile);
+
+/**
+ * @swagger
+ * /users/ranking:
+ *   get:
+ *     summary: Obtener ranking de jugadores
+ *     tags: [Usuarios]
+ *     responses:
+ *       200:
+ *         description: Lista ordenada de jugadores por puntos
+ */
+router.get("/ranking", getRanking);
 
 export default router;

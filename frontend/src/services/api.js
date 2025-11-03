@@ -75,3 +75,14 @@ export const sendChatMessage = async (message) => {
   if (!res.ok) throw new Error("Error al enviar mensaje");
   return res.json();
 };
+
+export const getRanking = async () => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/users/ranking`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    throw new Error("Error al obtener el ranking");
+  }
+  return res.json();
+};
