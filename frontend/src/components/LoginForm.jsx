@@ -11,7 +11,10 @@ export default function LoginForm() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
+  setError(""); // limpiar errores anteriores
+
+  try {
     const data = await loginUser(username, password);
 
     if (data.token) {
@@ -19,9 +22,17 @@ export default function LoginForm() {
       localStorage.setItem("username", data.username);
       navigate("/home");
     } else {
-      setError(data.message || "Error al iniciar sesión");
+      setError("Credenciales incorrectas. Intenta de nuevo.");
     }
-  };
+  } catch (err) {
+    console.error("❌ Error al iniciar sesión:", err);
+    if (err.message.includes("401") || err.message.includes("incorrecta")) {
+      setError("Credenciales incorrectas. Intenta de nuevo.");
+    } else {
+      setError("Error al conectar con el servidor. Inténtalo más tarde.");
+    }
+  }
+};
 
   return (
     <Card

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Container, Navbar, Button, Image } from "react-bootstrap";
+import { Container, Navbar, Button, Image, Nav } from "react-bootstrap";
 import logo from "../assets/logo2.png";
 
 export default function AppNavbar() {
@@ -23,9 +23,11 @@ export default function AppNavbar() {
       }}
     >
       <Container>
+        {/* Logo + título */}
         <Navbar.Brand
           href="/home"
           className="d-flex align-items-center text-light fw-bold fs-4"
+          style={{ cursor: "pointer" }}
         >
           <Image
             src={logo}
@@ -37,9 +39,24 @@ export default function AppNavbar() {
           />
           GuessBeat
         </Navbar.Brand>
-        <Button variant="outline-light" onClick={handleLogout}>
-          Cerrar sesión
-        </Button>
+
+        {/* Botones a la derecha */}
+        <Nav className="ms-auto d-flex align-items-center gap-2">
+          <Button
+            variant="outline-info"
+            onClick={() => navigate("/chat")}
+            className="fw-semibold"
+          >
+            💬 Chat
+          </Button>
+          <Button
+            variant="outline-light"
+            onClick={handleLogout}
+            className="fw-semibold"
+          >
+            Cerrar sesión
+          </Button>
+        </Nav>
       </Container>
     </Navbar>
   );
