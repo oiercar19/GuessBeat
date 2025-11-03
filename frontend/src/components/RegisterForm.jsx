@@ -25,7 +25,13 @@ export default function RegisterForm() {
       }}
     >
       <div className="text-center mb-3">
-        <Image src={logo} width={70} height={70} className="mb-2" />
+        <Image
+          src={logo}
+          width={80}
+          height={80}
+          className="mb-3 border border-3 border-primary rounded-circle shadow-sm"
+          alt="GuessBeat Logo"
+        />
         <h3 className="fw-bold">Crear Cuenta</h3>
         <p className="small">Únete y compite adivinando canciones 🎧</p>
       </div>
