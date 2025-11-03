@@ -16,6 +16,7 @@ export default function AppNavbar() {
       bg="dark"
       variant="dark"
       expand="lg"
+      fixed="top"
       className="shadow-sm py-3"
       style={{
         background:
@@ -50,7 +51,13 @@ export default function AppNavbar() {
             💬 Chat
           </Button>
           <Button
-            variant="outline-light"
+            variant="outline-warning"
+            onClick={() => navigate("/ranking")}
+          >
+            🏆 Ranking
+          </Button>
+          <Button
+            variant="outline-danger"
             onClick={handleLogout}
             className="fw-semibold"
           >

@@ -3,6 +3,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import HomePage from "./pages/HomePage";
 import ChatPage from "./pages/ChatPage";
+import RankingPage from "./pages/RankingPage";
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/chat" element={<ChatPage />} />
+        <Route path="/ranking" element={<RankingPage />} />
       </Routes>
     </Router>
   );

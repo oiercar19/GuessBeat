@@ -56,6 +56,7 @@ export default function HomePage() {
         minHeight: "100vh",
         background: "linear-gradient(135deg, #111, #1a1a40, #000)",
         color: "#fff",
+        paddingTop: "100px",
       }}
     >
       <AppNavbar />
@@ -80,7 +81,7 @@ export default function HomePage() {
                 Hola, <b>{profile.username}</b>
               </p>
               <p className="fs-4">
-                Puntos: <span className="text-warning">{profile.stats}</span>
+                Tus puntos: <span className="text-warning">{profile.stats}</span>
               </p>
             </div>
           ) : (

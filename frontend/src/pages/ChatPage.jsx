@@ -4,21 +4,26 @@ import { getChatMessages, sendChatMessage } from "../services/api";
 import AppNavbar from "../components/Navbar";
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState("");
+  const [posts, setPosts] = useState([]);
+  const [newPost, setNewPost] = useState("");
   const [loading, setLoading] = useState(true);
   const username = localStorage.getItem("username");
 
   useEffect(() => {
-    loadMessages();
+    loadPosts();
   }, []);
 
-  const loadMessages = async () => {
+  const loadPosts = async () => {
     try {
       const data = await getChatMessages();
-      setMessages(data);
+      // Mostramos los más nuevos primero
+      setPosts(
+        Array.isArray(data)
+          ? data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+          : []
+      );
     } catch (err) {
-      console.error("Error al cargar chat:", err);
+      console.error("Error al cargar el tablón:", err);
     } finally {
       setLoading(false);
     }
@@ -26,15 +31,29 @@ export default function ChatPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newPost.trim()) return;
 
     try {
-      const msg = await sendChatMessage(newMessage);
-      setMessages([...messages, msg]);
-      setNewMessage("");
+      const post = await sendChatMessage(newPost);
+      setPosts([post, ...posts]); // Añadir arriba del todo
+      setNewPost("");
     } catch (err) {
-      console.error("Error al enviar mensaje:", err);
+      console.error("Error al publicar:", err);
     }
+  };
+
+  const formatDateTime = (timestamp) => {
+    const date = new Date(timestamp);
+    const formattedDate = date.toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+    });
+    const formattedTime = date.toLocaleTimeString("es-ES", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    return `${formattedDate} — ${formattedTime}`;
   };
 
   return (
@@ -43,44 +62,74 @@ export default function ChatPage() {
         minHeight: "100vh",
         background: "linear-gradient(135deg, #111, #1a1a40, #000)",
         color: "#fff",
+        margin: 0,
+        paddingTop: "90px", // 👈 deja espacio para la navbar fija
+        paddingBottom: "40px", // 👈 evita que se vea la franja blanca abajo
+        overflowX: "hidden",
       }}
     >
       <AppNavbar />
-      <Container className="mt-4">
-        <Card
-          className="p-3 shadow-lg text-white"
-          style={{ background: "rgba(25,25,40,0.9)", height: "75vh", overflowY: "auto" }}
-        >
-          <h3 className="text-info mb-3">💬 Chat General</h3>
-          {loading ? (
-            <div className="text-center"><Spinner animation="border" variant="info" /></div>
-          ) : (
-            <div>
-              {messages.map((msg) => (
-                <div key={msg._id} className="mb-2">
-                  <b className={msg.user?.username === username ? "text-warning" : "text-info"}>
-                    {msg.user?.username || "Anon"}
-                  </b>
-                  <span className="text-muted small">
-                    {" "}
-                    — {new Date(msg.timestamp).toLocaleTimeString()}
-                  </span>
-                  <div>{msg.message}</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
 
-        <Form onSubmit={handleSubmit} className="mt-3 d-flex gap-2">
-          <Form.Control
-            type="text"
-            placeholder="Escribe un mensaje..."
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-          />
-          <Button variant="info" type="submit">Enviar</Button>
+      <Container className="mt-4" style={{ maxWidth: "800px" }}>
+        <h2 className="text-center text-info mb-4 fw-bold">🗨️ Tablón de GuessBeat</h2>
+
+        {/* Formulario para nueva publicación */}
+        <Form onSubmit={handleSubmit} className="mb-4">
+          <Card
+            className="p-3 bg-dark text-white border-secondary shadow-sm"
+            style={{ borderRadius: "15px" }}
+          >
+            <Form.Control
+              as="textarea"
+              rows={3}
+              placeholder="Comparte tus ideas, teorías o comentarios sobre el juego..."
+              value={newPost}
+              onChange={(e) => setNewPost(e.target.value)}
+              className="mb-3 bg-dark text-white border border-secondary"
+            />
+            <Button type="submit" variant="info" className="w-100 fw-semibold">
+              Publicar 💭
+            </Button>
+          </Card>
         </Form>
+
+        {/* Listado de publicaciones */}
+        {loading ? (
+          <div className="text-center mt-5">
+            <Spinner animation="border" variant="info" />
+          </div>
+        ) : posts.length === 0 ? (
+          <p className="text-center text-muted">Aún no hay publicaciones.</p>
+        ) : (
+          posts.map((post) => (
+            <Card
+              key={post._id}
+              className="p-3 mb-3 shadow-sm border-0"
+              style={{
+                background: "rgba(35,35,60,0.95)",
+                borderRadius: "15px",
+              }}
+            >
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <h5
+                  className={`mb-0 fw-bold ${
+                    post.user?.username === username ? "text-warning" : "text-info"
+                  }`}
+                >
+                  {post.user?.username || "Anónimo"}
+                </h5>
+              </div>
+
+              <p className="mb-2 text-light fs-5">{post.message}</p>
+
+              <div className="text-end" style={{ color: "#ccc" }}>
+                <small className="fst-italic">
+                  📅 {formatDateTime(post.timestamp || post.createdAt)}
+                </small>
+              </div>
+            </Card>
+          ))
+        )}
       </Container>
     </div>
   );
