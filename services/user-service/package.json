@@ -14,7 +14,9 @@
     "dotenv": "^16.4.1",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^7.6.0"
+    "mongoose": "^7.6.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
