@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import morgan from "morgan";
 import usersProxy from "./routes/usersProxy.js";
 import chatProxy from "./routes/chatProxy.js";
+import rankingProxy from "./routes/rankingProxy.js";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use(morgan("dev"));
 // ✅ Ambas rutas pasan al mismo proxy
 app.use("/api/users", usersProxy);
 app.use("/api/chat", chatProxy);
+app.use("/api/users/ranking", rankingProxy);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
