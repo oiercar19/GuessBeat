@@ -51,3 +51,27 @@ export const getProfile = async () => {
   
   return res.json();
 };
+
+// --- CHAT GENERAL ---
+export const getChatMessages = async () => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/chat`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error("Error al obtener mensajes del chat");
+  return res.json();
+};
+
+export const sendChatMessage = async (message) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/chat`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ message }),
+  });
+  if (!res.ok) throw new Error("Error al enviar mensaje");
+  return res.json();
+};
