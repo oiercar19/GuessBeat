@@ -1,17 +1,17 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
 
-export const registerUser = async (username, password) => {
+export const registerUser = async (username, email, password) => {
   const res = await fetch(`${API_URL}/users/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ username, email, password }),
   });
   
   if (!res.ok) {
     const error = await res.json();
     throw new Error(error.message || "Error en el registro");
   }
-  
+
   return res.json();
 };
 

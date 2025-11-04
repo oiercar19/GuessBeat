@@ -3,22 +3,37 @@ import bcrypt from "bcryptjs";
 import generateToken from "../utils/generateToken.js";
 
 export const registerUser = async (req, res) => {
-  const { username, password } = req.body;
+  const { username, email, password } = req.body;
 
   try {
-    const userExists = await User.findOne({ username });
-    if (userExists)
-      return res.status(400).json({ message: "El usuario ya existe" });
+    // Comprobar si ya existe usuario o email
+    const userExists = await User.findOne({ 
+      $or: [{ username }, { email }] 
+    });
+    if (userExists) {
+      return res.status(400).json({ message: "El usuario o email ya existen" });
+    }
 
+    // Hash de contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ username, password: hashedPassword });
+
+    // Crear usuario
+    const user = await User.create({ 
+      username, 
+      email,
+      password: hashedPassword,
+      avatarIndex: null, // 🔹 campo preparado para futuro sistema de avatares
+    });
 
     res.status(201).json({
       _id: user._id,
       username: user.username,
+      email: user.email,
+      avatarIndex: user.avatarIndex,
       token: generateToken(user._id),
     });
   } catch (error) {
+    console.error("❌ Error en registro:", error);
     res.status(500).json({ message: error.message });
   }
 };

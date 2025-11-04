@@ -5,13 +5,21 @@ import logo from "../assets/logo2.png";
 
 export default function RegisterForm() {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = await registerUser(username, password);
-    setMsg(data.message || "Usuario registrado correctamente");
+    try {
+      const data = await registerUser(username, email, password);
+      setMsg(data.message || "Usuario registrado correctamente 🎉");
+      setError("");
+    } catch (err) {
+      setError(err.message);
+      setMsg("");
+    }
   };
 
   return (
@@ -36,7 +44,8 @@ export default function RegisterForm() {
         <p className="small">Únete y compite adivinando canciones 🎧</p>
       </div>
 
-      {msg && <Alert variant="info">{msg}</Alert>}
+      {msg && <Alert variant="success">{msg}</Alert>}
+      {error && <Alert variant="danger">{error}</Alert>}
 
       <Form onSubmit={handleSubmit}>
         <Form.Group controlId="username" className="mb-3">
@@ -46,6 +55,17 @@ export default function RegisterForm() {
             placeholder="Elige un nombre de usuario"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </Form.Group>
+
+        <Form.Group controlId="email" className="mb-3">
+          <Form.Label>Email</Form.Label>
+          <Form.Control
+            type="email"
+            placeholder="Introduce tu correo electrónico"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
         </Form.Group>
