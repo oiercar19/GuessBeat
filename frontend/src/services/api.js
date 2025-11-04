@@ -86,3 +86,22 @@ export const getRanking = async () => {
   }
   return res.json();
 };
+
+export const updateProfile = async (data) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/users/update`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.message || "Error al actualizar perfil");
+  }
+
+  return res.json();
+};

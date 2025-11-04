@@ -22,7 +22,7 @@ export const registerUser = async (req, res) => {
       username, 
       email,
       password: hashedPassword,
-      avatarIndex: null, // 🔹 campo preparado para futuro sistema de avatares
+      avatarIndex: 0, // 🔹 campo preparado para futuro sistema de avatares
     });
 
     res.status(201).json({
@@ -74,5 +74,57 @@ export const getRanking = async (req, res) => {
   } catch (error) {
     console.error("❌ Error al obtener ranking:", error);
     res.status(500).json({ message: "Error al obtener ranking" });
+  }
+};
+
+export const getUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("-password");
+    if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+    res.json(user);
+  } catch (error) {
+    console.error("❌ Error al obtener perfil:", error);
+    res.status(500).json({ message: "Error al obtener perfil" });
+  }
+};
+
+/**
+ * Actualizar usuario (username, email, password, avatar)
+ */
+export const updateUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+
+    const { username, email, password, avatarIndex } = req.body;
+
+    if (username) user.username = username;
+    if (email) user.email = email;
+    if (password) user.password = await bcrypt.hash(password, 10);
+
+    // 🧠 Solo permitir comprar avatares si tiene puntos suficientes
+    if (avatarIndex !== undefined && avatarIndex !== user.avatarIndex) {
+      const cost = 500;
+      if (user.stats >= cost) {
+        user.avatarIndex = avatarIndex;
+        user.stats -= cost;
+      } else {
+        return res.status(400).json({ message: "No tienes suficientes puntos para comprar este avatar" });
+      }
+    }
+
+    const updatedUser = await user.save();
+    res.json({
+      message: "Perfil actualizado correctamente",
+      user: {
+        username: updatedUser.username,
+        email: updatedUser.email,
+        avatarIndex: updatedUser.avatarIndex,
+        stats: updatedUser.stats,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Error al actualizar perfil:", error);
+    res.status(500).json({ message: "Error al actualizar perfil" });
   }
 };

@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
+import { Schema } from "mongoose";
 
-const socialLoginSchema = new mongoose.Schema({
+const socialLoginSchema = new Schema({
   provider: { type: String },
   providerId: { type: String },
 });
 
-const userSchema = new mongoose.Schema(
+const userSchema = new Schema(
   {
     username: { type: String, required: true, unique: true },
     email: { 
