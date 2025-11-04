@@ -63,6 +63,15 @@ export default function AppNavbar() {
           >
             Cerrar sesión
           </Button>
+          <Image
+            src={`/avatars/${localStorage.getItem("avatarIndex") || 0}.png`}
+            width="40"
+            height="40"
+            roundedCircle
+            className="me-3 border border-2 border-info"
+            style={{ cursor: "pointer" }}
+            onClick={() => navigate("/profile")}
+          />
         </Nav>
       </Container>
     </Navbar>
