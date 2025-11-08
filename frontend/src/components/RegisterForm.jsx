@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { registerUser } from "../services/api";
 import { Form, Button, Card, Alert, Image } from "react-bootstrap";
 import logo from "../assets/logo2.png";
 
 export default function RegisterForm() {
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,6 +18,7 @@ export default function RegisterForm() {
       const data = await registerUser(username, email, password);
       setMsg(data.message || "Usuario registrado correctamente 🎉");
       setError("");
+      navigate("/");
     } catch (err) {
       setError(err.message);
       setMsg("");

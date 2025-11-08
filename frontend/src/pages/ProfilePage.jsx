@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Container, Card, Form, Button, Image, Row, Col, Alert } from "react-bootstrap";
 import { getProfile, updateProfile } from "../services/api";
 import AppNavbar from "../components/Navbar";
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -34,6 +36,8 @@ export default function ProfilePage() {
       setMsg(updated.message);
       setError("");
       setPassword("");
+      localStorage.setItem("avatarIndex", avatarIndex); // 💾 Guarda nuevo avatar
+      navigate("/home");
     } catch (err) {
       setError(err.message);
       setMsg("");
@@ -68,15 +72,15 @@ export default function ProfilePage() {
             <Form onSubmit={handleSubmit}>
               <div className="text-center mb-4">
                 <Image
-                  src={`/avatars/${avatarIndex}.png`}
+                  src={`/avatars/${avatarIndex}.jpg`}
                   width={100}
                   height={100}
                   roundedCircle
                   className="border border-3 border-info shadow-sm mb-3"
                   alt="Avatar"
                 />
-                <p className="text-muted small">
-                  Puntos disponibles: <span className="text-warning">{user.stats}</span>
+                <p className=" small">
+                  Puntos: <span className="text-warning">{user.stats}</span>
                 </p>
               </div>
 
@@ -111,12 +115,12 @@ export default function ProfilePage() {
                 />
               </Form.Group>
 
-              <h5 className="text-info mt-4 mb-3">🎨 Selecciona tu avatar</h5>
+              <h5 className="text-info mt-4 mb-3">🎨 Selecciona tu avatar (-500 puntos)</h5>
               <Row className="text-center">
-                {[0, 1, 2, 3, 4, 5].map((i) => (
+                {Array.from({ length: 18 }, (_, idx) => idx + 1).map((i) => (
                   <Col key={i} xs={4} md={2} className="mb-3">
                     <Image
-                      src={`/avatars/${i}.png`}
+                      src={`/avatars/${i}.jpg`}
                       width={70}
                       height={70}
                       roundedCircle

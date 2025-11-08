@@ -51,6 +51,8 @@ export const loginUser = async (req, res) => {
     res.json({
     _id: user._id,
     username: user.username,
+    email: user.email,
+    avatarIndex: user.avatarIndex,
     token: generateToken(user),
     });
   } catch (error) {
@@ -66,7 +68,7 @@ export const getProfile = async (req, res) => {
 
 export const getRanking = async (req, res) => {
   try {
-    const users = await User.find({}, "username stats")
+    const users = await User.find({}, "username stats avatarIndex")
       .sort({ stats: -1 })
       .limit(20); // top 20 jugadores
 

@@ -64,7 +64,7 @@ export default function AppNavbar() {
             Cerrar sesión
           </Button>
           <Image
-            src={`/avatars/${localStorage.getItem("avatarIndex") || 0}.png`}
+            src={`/avatars/${localStorage.getItem("avatarIndex") || 0}.jpg`}
             width="40"
             height="40"
             roundedCircle

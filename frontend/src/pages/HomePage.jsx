@@ -37,6 +37,8 @@ export default function HomePage() {
         console.log("📡 Solicitando perfil con token...");
         const userData = await getProfile(token); // ✅ le pasamos el token
         setProfile(userData);
+        localStorage.setItem("username", userData.username);
+        localStorage.setItem("avatarIndex", userData.avatarIndex ?? 0);
         console.log("✅ Perfil cargado:", userData);
       } catch (error) {
         console.error("❌ Error al obtener perfil:", error);

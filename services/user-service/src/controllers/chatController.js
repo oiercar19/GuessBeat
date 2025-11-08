@@ -6,7 +6,7 @@ import ChatMessage from "../models/ChatMessage.js";
 export const getChatMessages = async (req, res) => {
   try {
     const messages = await ChatMessage.find()
-      .populate("user", "username")
+      .populate("user", "username avatarIndex") // ✅ Incluimos avatarIndex
       .sort({ timestamp: -1 }); // más nuevos primero
 
     res.status(200).json(messages);
@@ -34,7 +34,8 @@ export const sendChatMessage = async (req, res) => {
 
     await newMessage.save();
 
-    const populatedMessage = await newMessage.populate("user", "username");
+    // ✅ Al devolverlo, también incluimos username + avatarIndex
+    const populatedMessage = await newMessage.populate("user", "username avatarIndex");
 
     res.status(201).json(populatedMessage);
   } catch (error) {

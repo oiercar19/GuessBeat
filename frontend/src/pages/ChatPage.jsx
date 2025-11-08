@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Container, Card, Form, Button, Spinner } from "react-bootstrap";
+import { Container, Card, Form, Button, Spinner, Image } from "react-bootstrap";
 import { getChatMessages, sendChatMessage } from "../services/api";
 import AppNavbar from "../components/Navbar";
 
@@ -56,6 +56,8 @@ export default function ChatPage() {
     return `${formattedDate} — ${formattedTime}`;
   };
 
+  const getAvatarSrc = (index) => `/avatars/${index || 0}.jpg`;
+
   return (
     <div
       style={{
@@ -63,8 +65,8 @@ export default function ChatPage() {
         background: "linear-gradient(135deg, #111, #1a1a40, #000)",
         color: "#fff",
         margin: 0,
-        paddingTop: "90px", // 👈 deja espacio para la navbar fija
-        paddingBottom: "40px", // 👈 evita que se vea la franja blanca abajo
+        paddingTop: "90px", // deja espacio para la navbar fija
+        paddingBottom: "40px", // evita la franja blanca inferior
         overflowX: "hidden",
       }}
     >
@@ -86,6 +88,7 @@ export default function ChatPage() {
               value={newPost}
               onChange={(e) => setNewPost(e.target.value)}
               className="mb-3 bg-dark text-white border border-secondary"
+              style={{ color: "#fff", "::placeholder": { color: "#bbb" } }}
             />
             <Button type="submit" variant="info" className="w-100 fw-semibold">
               Publicar 💭
@@ -110,22 +113,36 @@ export default function ChatPage() {
                 borderRadius: "15px",
               }}
             >
-              <div className="d-flex justify-content-between align-items-center mb-2">
-                <h5
-                  className={`mb-0 fw-bold ${
-                    post.user?.username === username ? "text-warning" : "text-info"
-                  }`}
-                >
-                  {post.user?.username || "Anónimo"}
-                </h5>
-              </div>
+              <div className="d-flex align-items-start gap-3">
+                {/* 🧑‍🎤 Avatar del usuario */}
+                <Image
+                  src={getAvatarSrc(post.user?.avatarIndex)}
+                  alt="Avatar"
+                  roundedCircle
+                  width="55"
+                  height="55"
+                  className="border border-2 border-info shadow-sm"
+                />
 
-              <p className="mb-2 text-light fs-5">{post.message}</p>
+                {/* Contenido del mensaje */}
+                <div className="flex-grow-1">
+                  <div className="d-flex justify-content-between align-items-center mb-1">
+                    <h5
+                      className={`fw-bold mb-0 ${
+                        post.user?.username === username
+                          ? "text-warning"
+                          : "text-info"
+                      }`}
+                    >
+                      {post.user?.username || "Anónimo"}
+                    </h5>
+                    <small className="fst-italic text-light opacity-75">
+                      📅 {formatDateTime(post.timestamp || post.createdAt)}
+                    </small>
+                  </div>
 
-              <div className="text-end" style={{ color: "#ccc" }}>
-                <small className="fst-italic">
-                  📅 {formatDateTime(post.timestamp || post.createdAt)}
-                </small>
+                  <p className="mb-2 text-light fs-5">{post.message}</p>
+                </div>
               </div>
             </Card>
           ))
