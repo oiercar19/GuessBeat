@@ -1,47 +1,42 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { getProfile } from "../services/api";
+import { getProfile, getCategories } from "../services/api";
 import AppNavbar from "../components/Navbar";
 import { Container, Spinner, Card } from "react-bootstrap";
 
 export default function HomePage() {
   const [profile, setProfile] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const initAuth = async () => {
-      // 1️⃣ Capturar token de la URL (OAuth)
       const tokenFromUrl = searchParams.get("token");
       if (tokenFromUrl) {
-        console.log("✅ Token recibido de OAuth");
         localStorage.setItem("token", tokenFromUrl);
-        // Limpiar la URL sin recargar la página
         window.history.replaceState({}, "", "/home");
       }
 
-      // 2️⃣ Esperar un microtick para garantizar que localStorage se actualizó
       await new Promise((res) => setTimeout(res, 50));
 
-      // 3️⃣ Obtener token de localStorage
       const token = localStorage.getItem("token");
       if (!token) {
-        console.log("❌ No hay token, redirigiendo al login");
         navigate("/login");
         return;
       }
 
-      // 4️⃣ Obtener perfil
       try {
-        console.log("📡 Solicitando perfil con token...");
-        const userData = await getProfile(token); // ✅ le pasamos el token
+        const userData = await getProfile(token);
         setProfile(userData);
         localStorage.setItem("username", userData.username);
         localStorage.setItem("avatarIndex", userData.avatarIndex ?? 0);
-        console.log("✅ Perfil cargado:", userData);
+
+        const cats = await getCategories();
+        setCategories(cats);
       } catch (error) {
-        console.error("❌ Error al obtener perfil:", error);
+        console.error("❌ Error:", error);
         localStorage.removeItem("token");
         navigate("/login");
       } finally {
@@ -52,44 +47,145 @@ export default function HomePage() {
     initAuth();
   }, [searchParams, navigate]);
 
+  // 🖼️ Imagenes para cada categoría (usa las tuyas o links de stock)
+  const categoryImages = {
+    clasica: "/images/categories/classic.jpg",
+    tecno: "/images/categories/techno.jpg",
+    reggaeton: "/images/categories/reggaeton.jpg",
+  };
+
   return (
     <div
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg, #111, #1a1a40, #000)",
+        background: "linear-gradient(135deg, #0a0a1a, #111132, #000)",
         color: "#fff",
         paddingTop: "100px",
       }}
     >
       <AppNavbar />
-      <Container className="d-flex flex-column align-items-center justify-content-center mt-5">
+      <Container className="d-flex flex-column align-items-center mt-5">
         <Card
-          className="p-4 text-center text-white shadow-lg"
+          className="p-4 text-center text-white shadow-lg mb-5"
           style={{
             background: "rgba(25,25,40,0.9)",
             border: "1px solid rgba(255,255,255,0.1)",
             maxWidth: "500px",
+            borderRadius: "20px",
           }}
         >
-          <h2 className="text-info mb-3">Bienvenido a GuessBeat 🎶</h2>
           {loading ? (
             <div className="d-flex flex-column align-items-center gap-3">
               <Spinner animation="border" variant="info" />
               <p className="text-muted">Cargando perfil...</p>
             </div>
           ) : profile ? (
-            <div>
+            <>
+              <h2 className="text-info mb-3 fw-bold">Bienvenido a GuessBeat 🎶</h2>
               <p className="fs-5">
                 Hola, <b>{profile.username}</b>
               </p>
-              <p className="fs-4">
-                Tus puntos: <span className="text-warning">{profile.stats}</span>
+              <p className="fs-4 mb-0">
+                Puntos: <span className="text-warning">{profile.stats}</span>
               </p>
-            </div>
+            </>
           ) : (
             <p className="text-danger">Error al cargar el perfil</p>
           )}
         </Card>
+
+        {!loading && categories.length > 0 && (
+          <>
+            <h3 className="text-info mb-4 fw-bold text-uppercase">
+              🎮 Modos de Juego
+            </h3>
+
+            <div
+              className="d-grid gap-4"
+              style={{
+                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                width: "100%",
+                maxWidth: "1000px",
+              }}
+            >
+              {categories.map((cat) => (
+                <div
+                  key={cat.id}
+                  className="game-card"
+                  onClick={() => navigate(`/game/${cat.id}`)}
+                  style={{
+                    position: "relative",
+                    cursor: "pointer",
+                    overflow: "hidden",
+                    borderRadius: "12px",
+                    boxShadow: "0 0 10px rgba(0,0,0,0.6)",
+                    transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "scale(1.05)";
+                    e.currentTarget.style.boxShadow =
+                      "0 0 25px rgba(13,202,240,0.6)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "scale(1)";
+                    e.currentTarget.style.boxShadow =
+                      "0 0 10px rgba(0,0,0,0.6)";
+                  }}
+                >
+                  {/* Imagen de fondo */}
+                  <img
+                    src={categoryImages[cat.id] || "/images/default.jpg"}
+                    alt={cat.name}
+                    style={{
+                      width: "100%",
+                      height: "180px",
+                      objectFit: "cover",
+                      filter: "brightness(0.6)",
+                      transition: "filter 0.3s ease",
+                    }}
+                    className="game-card-img"
+                  />
+
+                  {/* Filtro y texto */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexDirection: "column",
+                      background:
+                        "linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.7))",
+                    }}
+                  >
+                    <h4
+                      className="fw-bold mb-1"
+                      style={{
+                        color: "#0dcaf0",
+                        textShadow: "0 0 10px rgba(13,202,240,0.8)",
+                        fontSize: "1.4rem",
+                      }}
+                    >
+                      {cat.name}
+                    </h4>
+                    <p
+                      className="small text-muted"
+                      style={{
+                        fontStyle: "italic",
+                      }}
+                    >
+                      {cat.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </Container>
     </div>
   );
