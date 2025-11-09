@@ -1,4 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
+import axios from "axios";
 
 export const registerUser = async (username, email, password) => {
   const res = await fetch(`${API_URL}/users/register`, {
@@ -6,7 +7,7 @@ export const registerUser = async (username, email, password) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, email, password }),
   });
-  
+
   if (!res.ok) {
     const error = await res.json();
     throw new Error(error.message || "Error en el registro");
@@ -21,34 +22,34 @@ export const loginUser = async (username, password) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
   });
-  
+
   if (!res.ok) {
     const error = await res.json();
     throw new Error(error.message || "Error en el login");
   }
-  
+
   return res.json();
 };
 
 export const getProfile = async () => {
   // Obtener el token del localStorage automáticamente
   const token = localStorage.getItem("token");
-  
+
   if (!token) {
     throw new Error("No hay token de autenticación");
   }
-  
+
   const res = await fetch(`${API_URL}/users/profile`, {
-    headers: { 
-      Authorization: `Bearer ${token}` 
+    headers: {
+      Authorization: `Bearer ${token}`
     },
   });
-  
+
   if (!res.ok) {
     const error = await res.json();
     throw new Error(error.message || "Error al obtener perfil");
   }
-  
+
   return res.json();
 };
 
@@ -104,4 +105,35 @@ export const updateProfile = async (data) => {
   }
 
   return res.json();
+};
+
+// --- SERVICIOS DE JUEGO ---
+
+// 🔹 Obtener categorías
+export const getCategories = async () => {
+  const res = await fetch(`${API_URL}/game/categories`);
+  if (!res.ok) throw new Error("Error al obtener categorías");
+  return res.json();
+};
+
+export const startGame = async (category) => {
+  const res = await axios.get(`http://localhost:8002/game/start?category=${category}`);
+  return res.data;
+};
+
+export const getFragment = async (gameId, index) => {
+  const res = await axios.get(`http://localhost:8002/game/fragment/${gameId}?index=${index}`);
+  return res.data;
+};
+
+export const checkGuess = async (gameId, guess) => {
+  const res = await axios.post(`http://localhost:8002/game/check`, null, {
+    params: { game_id: gameId, guess },
+  });
+  return res.data;
+};
+
+export const searchSongs = async (query) => {
+  const res = await axios.get(`http://localhost:8002/game/search?query=${query}`);
+  return res.data;
 };
