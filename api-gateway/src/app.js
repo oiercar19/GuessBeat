@@ -5,6 +5,7 @@ import morgan from "morgan";
 import usersProxy from "./routes/usersProxy.js";
 import chatProxy from "./routes/chatProxy.js";
 import rankingProxy from "./routes/rankingProxy.js";
+import gameProxy from "./routes/gameProxy.js";
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use(morgan("dev"));
 app.use("/api/users", usersProxy);
 app.use("/api/chat", chatProxy);
 app.use("/api/users/ranking", rankingProxy);
+app.use("/api/game", gameProxy);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
