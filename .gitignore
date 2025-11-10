@@ -99,3 +99,6 @@ dump/
 *.old
 *.backup
 *.orig
+
+# Archivos de caché
+*.cpython*
