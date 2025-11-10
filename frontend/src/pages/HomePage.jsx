@@ -49,9 +49,9 @@ export default function HomePage() {
 
   // 🖼️ Imagenes para cada categoría (usa las tuyas o links de stock)
   const categoryImages = {
-    clasica: "/images/categories/classic.jpg",
-    tecno: "/images/categories/techno.jpg",
-    reggaeton: "/images/categories/reggaeton.jpg",
+    1: "julio.webp", // Música en español
+    2: "rock.jpg",    // Rock
+    3: "70s80s.jpg",   // Años 70 y 80
   };
 
   return (
@@ -134,7 +134,7 @@ export default function HomePage() {
                 >
                   {/* Imagen de fondo */}
                   <img
-                    src={categoryImages[cat.id] || "/images/default.jpg"}
+                    src={categoryImages[cat.id] || "https://upload.wikimedia.org/wikipedia/commons/c/c9/Moon.jpg"}
                     alt={cat.name}
                     style={{
                       width: "100%",
@@ -173,8 +173,10 @@ export default function HomePage() {
                       {cat.name}
                     </h4>
                     <p
-                      className="small text-muted"
+                      className="small"
                       style={{
+                        color: "#e0e0e0",
+                        textShadow: "0 0 5px rgba(0,0,0,0.8)",
                         fontStyle: "italic",
                       }}
                     >
