@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import categories, game
+from app.db import models, database, crud
+from app.routers import game, categories
 
-app = FastAPI(title="GuessBeat Game Service")
+app = FastAPI(title="GuessBeat Game Service (MySQL)")
 
 app.add_middleware(
     CORSMiddleware,
@@ -12,10 +13,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+def startup_event():
+    models.Base.metadata.create_all(bind=database.engine)
+    db = database.SessionLocal()
+    crud.add_default_data(db)
+    db.close()
+
 @app.get("/")
 def root():
-    return {"message": "🎮 Servicio de juego activo"}
+    return {"message": "🎮 Servicio de juego activo con MySQL"}
 
-# 👇 Prefijos importantes
 app.include_router(categories.router, prefix="/categories", tags=["Categories"])
 app.include_router(game.router, prefix="/game", tags=["Game"])
