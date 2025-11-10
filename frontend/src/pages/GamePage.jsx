@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { startGame, checkGuess, searchSongs } from "../services/api";
+import { startGame, searchSongs } from "../services/api";
 import AppNavbar from "../components/Navbar";
 import { Container, Button, Form, Card, ProgressBar, ListGroup } from "react-bootstrap";
 
@@ -77,32 +77,60 @@ export default function GamePage() {
     }
   };
 
-  const skipFragment = () => {
+  const skipFragment = async () => {
     if (fragmentIndex < 4) {
       setFragmentIndex(fragmentIndex + 1);
       setFragmentTime(fragmentTime + 5);
       setFeedback("⏭ Nuevo fragmento desbloqueado");
     } else {
-      setFeedback(`💀 Fin del juego. La canción era: ${game.title}`);
+      // 👉 Fin del juego sin adivinar
+      setFeedback(`💀 Fin del juego. La canción era: ${game.title} (-8 pts)`);
       setFinished(true);
-      playFullTrack(); // 🔊 Reproduce 30s al terminar
+      playFullTrack();
+
+      // ⚠️ Restar puntos al usuario
+      const username = localStorage.getItem("username");
+      try {
+        await fetch("http://localhost:5001/api/users/update-stats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, points: -8 }),
+        });
+      } catch (error) {
+        console.error("⚠️ Error al restar puntos:", error);
+      }
     }
   };
 
   const handleGuess = async () => {
     if (!guess.trim()) return;
 
-    const res = await checkGuess(game.title, guess);
-    if (res.correct) {
-      setFeedback(`🎉 ¡Correcto! Era "${res.title}"`);
-      setFinished(true);
-      playFullTrack(); // 🎶 Reproduce 30s si aciertas
-    } else {
-      skipFragment();
-    }
-    setGuess("");
-    setSuggestions([]);
-  };
+    const username = localStorage.getItem("username");
+    const attempt = fragmentIndex + 1;
+
+    const res = await fetch(
+      `http://localhost:8002/game/check?title=${encodeURIComponent(game.title)}&guess=${encodeURIComponent(guess)}`,
+      {
+        method: "POST",
+        headers: {
+          "X-Username": username,
+          "X-Attempt": attempt
+        }
+      }
+    );
+  const data = await res.json();
+
+  if (data.correct) {
+    setFeedback(`🎉 ¡Correcto! Era "${data.title}" (+${data.points} pts)`);
+    setFinished(true);
+    playFullTrack();
+  } else {
+    skipFragment();
+  }
+  setGuess("");
+  setSuggestions([]);
+};
+
 
   // 🔍 Buscar canciones
   const handleSearch = async (text) => {

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getProfile, getCategories } from "../services/api";
 import AppNavbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import { Container, Spinner, Card } from "react-bootstrap";
 
 export default function HomePage() {
@@ -189,6 +190,7 @@ export default function HomePage() {
           </>
         )}
       </Container>
+      <Footer />
     </div>
   );
 }
