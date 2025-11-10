@@ -92,7 +92,7 @@ export default function GamePage() {
   const handleGuess = async () => {
     if (!guess.trim()) return;
 
-    const res = await checkGuess(game.game_id, guess);
+    const res = await checkGuess(game.title, guess);
     if (res.correct) {
       setFeedback(`🎉 ¡Correcto! Era "${res.title}"`);
       setFinished(true);
@@ -237,18 +237,23 @@ export default function GamePage() {
                 </>
               ) : (
                 <>
-                  <img
-                    src={game.artwork}
-                    alt="cover"
-                    width="150"
-                    height="150"
-                    className="rounded mb-3 shadow"
-                  />
-                  <p className="fs-5 mt-2">
-                    🎵 <strong>{game.title}</strong> <br />
-                    👤 {game.artist} <br />
-                    📅 {game.release_year || "Año desconocido"}
-                  </p>
+                  <div className="d-flex flex-column align-items-center mt-3">
+                    <img
+                      src={game.artwork}
+                      alt="cover"
+                      width="150"
+                      height="150"
+                      className="rounded mb-3 shadow"
+                      style={{ objectFit: "cover" }}
+                    />
+                    <p className="fs-5 text-center">
+                      🎵 <strong>{game.title}</strong>
+                      <br />
+                      👤 {game.artist}
+                      <br />
+                      📅 {game.release_year}
+                    </p>
+                  </div>
 
                   <Button
                     variant="info"

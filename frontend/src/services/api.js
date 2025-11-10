@@ -126,9 +126,9 @@ export const getFragment = async (gameId, index) => {
   return res.data;
 };
 
-export const checkGuess = async (gameId, guess) => {
+export const checkGuess = async (title, guess) => {
   const res = await axios.post(`http://localhost:8002/game/check`, null, {
-    params: { game_id: gameId, guess },
+    params: { title, guess },
   });
   return res.data;
 };
