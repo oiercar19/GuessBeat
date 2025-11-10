@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
+import re
+import requests
 from app.db.database import get_db
 from app.db import crud
 from app.services.soundcloud import search_tracks
@@ -79,27 +81,60 @@ def search_song(query: str):
     return filtered[:5]
 
 
-
 @router.post("/check")
-def check_guess(title: str = Query(...), guess: str = Query(...)):
+def check_guess(
+    title: str = Query(...),
+    guess: str = Query(...),
+    request: Request = None
+):
     """
     Comprueba si el jugador ha adivinado la canción.
-    Ignora mayúsculas/minúsculas, espacios extra y guiones del tipo ' - '.
+    Ignora mayúsculas, espacios y guiones. Calcula puntos según el intento.
     """
-    # Normalizar textos (todo minúsculas, sin espacios extra)
+    username = request.headers.get("X-Username")  # lo manda el frontend
+    attempt = int(request.headers.get("X-Attempt", 1))  # intento actual
+
+    # --- Normalización del título ---
     title_clean = title.lower().strip()
     guess_clean = guess.lower().strip()
 
-    # Si el título contiene un " - ", nos quedamos solo con la parte antes del guion
+    # Eliminar texto tras " - " (artista)
     if " - " in title_clean:
         title_clean = title_clean.split(" - ")[0].strip()
 
-    # Eliminar también cualquier texto entre paréntesis (versiones, remixes, etc.)
-    import re
+    # Eliminar texto entre paréntesis (versiones, remixes, etc.)
     title_clean = re.sub(r"\(.*?\)", "", title_clean).strip()
 
-    # Comprobación flexible
-    if guess_clean in title_clean or title_clean in guess_clean:
-        return {"correct": True, "title": title}
-    
-    return {"correct": False}
+    # --- Sistema de puntos ---
+    points_table = {1: 10, 2: 8, 3: 6, 4: 4, 5: 2}
+    points = 0
+
+    # --- Comprobación ---
+    if guess_clean.startswith(title_clean):  # debe empezar con el nombre de la canción
+        points = points_table.get(attempt, 0)
+        if username:
+            update_user_points(username, points)
+        return {"correct": True, "title": title, "points": points}
+
+    # Si falla en el último intento
+    if attempt >= 5 and username:
+        update_user_points(username, -8)
+        points = -8
+
+    return {"correct": False, "points": points}
+
+def update_user_points(username: str, points: int):
+    """Envía una actualización de puntos al microservicio de usuarios (Node.js)."""
+    try:
+        res = requests.post(
+            "http://localhost:5000/api/users/update-stats",
+            json={"username": username, "points": points},
+            timeout=5
+        )
+        if res.status_code != 200:
+            print(f"⚠️ Error al actualizar puntos: {res.text}")
+    except Exception as e:
+        print(f"❌ No se pudo conectar con el microservicio de usuarios: {e}")
+
+
+

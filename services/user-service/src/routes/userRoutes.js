@@ -1,4 +1,5 @@
 import express from "express";
+import User from "../models/User.js";
 import {
   registerUser,
   loginUser,
@@ -202,5 +203,22 @@ router.put("/update", protect, updateUserProfile);
  *         description: Lista de jugadores ordenada por puntos
  */
 router.get("/ranking", protect, getRanking);
+
+router.post("/update-stats", async (req, res) => {
+  const { username, points } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+
+    user.stats = (user.stats || 0) + points;
+    await user.save();
+
+    res.json({ message: "Puntos actualizados", newStats: user.stats });
+  } catch (error) {
+    console.error("Error al actualizar stats:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+});
 
 export default router;
