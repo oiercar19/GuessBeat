@@ -11,6 +11,19 @@ services:
     volumes:
       - mongo-data:/data/db
 
+  # 🗄️ Base de datos MySQL
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=guessbeat
+    volumes:
+      - mysql-data:/var/lib/mysql
+
   # 🚀 Microservicio de usuarios
   user-service:
     build: ./services/user-service
@@ -28,6 +41,24 @@ services:
     depends_on:
       - mongo
 
+  # 🎮 Microservicio de juego
+  game-service:
+    build: ./services/game-service
+    container_name: game-service
+    restart: always
+    ports:
+      - "8002:8002"
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DB=guessbeat
+      - SOUNDCLOUD_CLIENT_ID=${SOUNDCLOUD_CLIENT_ID}
+      - SOUNDCLOUD_CLIENT_SECRET=${SOUNDCLOUD_CLIENT_SECRET}
+    depends_on:
+      - mysql
+
   # 🌐 API Gateway
   api-gateway:
     build: ./api-gateway
@@ -38,8 +69,10 @@ services:
     environment:
       - PORT=5000
       - USER_SERVICE_URL=http://user-service:5001
+      - GAME_SERVICE_URL=http://game-service:8002
     depends_on:
       - user-service
+      - game-service
 
   # 💻 Frontend
   frontend:
@@ -53,3 +86,4 @@ services:
 
 volumes:
   mongo-data:
+  mysql-data:
