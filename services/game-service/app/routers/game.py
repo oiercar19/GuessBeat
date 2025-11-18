@@ -17,7 +17,14 @@ def start_game(category: int = Query(..., description="ID de la categoría"), db
     if not song:
         return {"error": "No hay canciones en esta categoría"}
 
-    results = search_tracks(song.title)
+    # 🔍 Buscar con título + artista para mejor precisión
+    search_query = f"{song.title} {song.artist}" if song.artist else song.title
+    results = search_tracks(search_query)
+    
+    # Si no encuentra nada con artista, intenta solo con el título
+    if not results and song.artist:
+        results = search_tracks(song.title)
+    
     if not results:
         return {"error": f"No se encontró '{song.title}' en SoundCloud"}
 
@@ -51,34 +58,70 @@ def get_fragment(game_id: str, index: int = 0):
 
 @router.get("/search")
 def search_song(query: str):
-    """Búsqueda refinada: evita remixes, versiones y duplica si el artista coincide."""
-    results = search_tracks(query, limit=15)
+    """Búsqueda refinada: evita remixes, versiones, covers y duplicados."""
+    # Intentar búsqueda con capitalización original y con title case
+    results = search_tracks(query, limit=40)
+    
+    # Si no hay resultados con la query original, probar con title case
+    if len(results) < 3:
+        query_title_case = query.title()
+        if query_title_case != query:
+            additional_results = search_tracks(query_title_case, limit=40)
+            # Combinar resultados sin duplicados por ID
+            existing_ids = {r["id"] for r in results}
+            for r in additional_results:
+                if r["id"] not in existing_ids:
+                    results.append(r)
+                    existing_ids.add(r["id"])
+    
     if not results:
         return []
 
     filtered = []
     seen_titles = set()
 
+    bad_keywords = [
+        "remix", "mix", "edit", "bootleg", "mashup", "cover", "karaoke",
+        "instrumental", "acapella", "remake", "rework", "flip", "vip",
+        "remastered", "remaster", "tribute", "version", "extended", "radio edit",
+        "club", "dub", "unofficial", "demo", "leaked", "snippet", "preview", "dj", "DJ"
+    ]
+
     for r in results:
-        title = r["title"].lower()
+        title = r["title"]
+        title_lower = title.lower()
         artist = r["artist"].lower() if r.get("artist") else ""
-
-        # Ignorar palabras no deseadas
-        if any(bad in title for bad in ["remix", "mix", "edit", "version", "live", "bootleg", "cover", "karaoke", "instrumental", "demo", "tribute", "acoustic", "original", "rework", "dubstep", "extended", "radio"]):
+        
+        if "(" in title or ")" in title or "[" in title or "]" in title:
             continue
-
-        # Evitar duplicados
-        base = title.split(" - ")[0].strip()
-        if base in seen_titles:
+        
+        has_bad_keyword = False
+        for bad in bad_keywords:
+            # Buscar la palabra completa (con espacios o al final)
+            if f" {bad} " in f" {title_lower} " or title_lower.endswith(f" {bad}"):
+                has_bad_keyword = True
+                break
+        
+        if has_bad_keyword:
             continue
-        seen_titles.add(base)
+        
+        normalized_title = title_lower.split(" - ")[0].strip()
+        normalized_title = re.sub(r"[^\w\s]", "", normalized_title)
+        normalized_title = re.sub(r"\s+", " ", normalized_title).strip()
+        
+        unique_key = f"{normalized_title}|{artist}"
+        
+        if unique_key in seen_titles:
+            continue
+        
+        seen_titles.add(unique_key)
+        filtered.append(r)
 
-        # Priorizar coincidencia con el artista (si existe)
-        if query.lower() in title or query.lower() in artist:
-            filtered.append(r)
+        # Limitar a 10 resultados únicos
+        if len(filtered) >= 10:
+            break
 
-    # Si no hay suficientes, devuelve lo que haya
-    return filtered[:5]
+    return filtered
 
 
 @router.post("/check")
@@ -98,19 +141,68 @@ def check_guess(
     title_clean = title.lower().strip()
     guess_clean = guess.lower().strip()
 
-    # Eliminar texto tras " - " (artista)
-    if " - " in title_clean:
-        title_clean = title_clean.split(" - ")[0].strip()
+    # Extraer solo el nombre de la canción (eliminar artista)
+    # Si el formato es "Artista - Canción", tomar la segunda parte
+    # Si el formato es "Canción - Artista", depende del contexto
+    title_parts = title_clean.split(" - ")
+    guess_parts = guess_clean.split(" - ")
+    
+    # Si hay " - ", tomar ambas partes para comparar
+    if len(title_parts) > 1:
+        # Puede ser "Artista - Canción" o "Canción - Artista"
+        title_song = title_parts[-1].strip()  # última parte (generalmente la canción)
+        title_artist = title_parts[0].strip()  # primera parte (generalmente el artista)
+    else:
+        title_song = title_clean
+        title_artist = ""
+    
+    if len(guess_parts) > 1:
+        guess_song = guess_parts[-1].strip()
+        guess_artist = guess_parts[0].strip()
+    else:
+        guess_song = guess_clean
+        guess_artist = ""
 
-    # Eliminar texto entre paréntesis (versiones, remixes, etc.)
-    title_clean = re.sub(r"\(.*?\)", "", title_clean).strip()
+    # Eliminar texto entre paréntesis y corchetes
+    title_song = re.sub(r"[\(\[].*?[\)\]]", "", title_song).strip()
+    title_artist = re.sub(r"[\(\[].*?[\)\]]", "", title_artist).strip()
+    guess_song = re.sub(r"[\(\[].*?[\)\]]", "", guess_song).strip()
+    guess_artist = re.sub(r"[\(\[].*?[\)\]]", "", guess_artist).strip()
+
+    # Eliminar caracteres especiales y espacios múltiples
+    def normalize(text):
+        text = re.sub(r"[^\w\s]", "", text)
+        text = re.sub(r"\s+", " ", text).strip()
+        return text
+    
+    title_song = normalize(title_song)
+    title_artist = normalize(title_artist)
+    guess_song = normalize(guess_song)
+    guess_artist = normalize(guess_artist)
+    title_full = normalize(title_clean)
+    guess_full = normalize(guess_clean)
 
     # --- Sistema de puntos ---
     points_table = {1: 10, 2: 8, 3: 6, 4: 4, 5: 2}
     points = 0
 
-    # --- Comprobación ---
-    if guess_clean.startswith(title_clean):  # debe empezar con el nombre de la canción
+    # --- Comprobación más estricta ---
+    # Solo acepta coincidencias exactas, no parciales
+    is_correct = (
+        # Coincidencia exacta del nombre de la canción
+        title_song == guess_song or
+        # Si el usuario escribió artista + canción completo
+        (title_artist and guess_artist and 
+         title_artist == guess_artist and title_song == guess_song) or
+        # Coincidencia completa normalizada
+        title_full == guess_full or
+        # Permitir que el usuario escriba solo la canción cuando el título tiene "Artista - Canción"
+        (title_artist and not guess_artist and title_song == guess_song) or
+        # Permitir que el usuario escriba solo la canción cuando el título tiene "Canción - Artista"
+        (title_artist and not guess_artist and title_artist == guess_song)
+    )
+
+    if is_correct:
         points = points_table.get(attempt, 0)
         if username:
             update_user_points(username, points)
