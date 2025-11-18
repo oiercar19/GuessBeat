@@ -7,8 +7,8 @@ export const registerUser = async (req, res) => {
 
   try {
     // Comprobar si ya existe usuario o email
-    const userExists = await User.findOne({ 
-      $or: [{ username }, { email }] 
+    const userExists = await User.findOne({
+      $or: [{ username }, { email }]
     });
     if (userExists) {
       return res.status(400).json({ message: "El usuario o email ya existen" });
@@ -18,8 +18,8 @@ export const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Crear usuario
-    const user = await User.create({ 
-      username, 
+    const user = await User.create({
+      username,
       email,
       password: hashedPassword,
       avatarIndex: 0, // 🔹 campo preparado para futuro sistema de avatares
@@ -49,11 +49,11 @@ export const loginUser = async (req, res) => {
     if (!isMatch) return res.status(401).json({ message: "Contraseña incorrecta" });
 
     res.json({
-    _id: user._id,
-    username: user.username,
-    email: user.email,
-    avatarIndex: user.avatarIndex,
-    token: generateToken(user),
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      avatarIndex: user.avatarIndex,
+      token: generateToken(user),
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -76,17 +76,6 @@ export const getRanking = async (req, res) => {
   } catch (error) {
     console.error("❌ Error al obtener ranking:", error);
     res.status(500).json({ message: "Error al obtener ranking" });
-  }
-};
-
-export const getUserProfile = async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id).select("-password");
-    if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
-    res.json(user);
-  } catch (error) {
-    console.error("❌ Error al obtener perfil:", error);
-    res.status(500).json({ message: "Error al obtener perfil" });
   }
 };
 

@@ -4,7 +4,6 @@ import {
   registerUser,
   loginUser,
   getProfile,
-  getUserProfile,
   updateUserProfile,
   getRanking,
 } from "../controllers/userController.js";
@@ -80,25 +79,9 @@ router.post("/login", loginUser);
  * @swagger
  * /users/profile:
  *   get:
- *     summary: Obtener el perfil del usuario autenticado (versión básica)
+ *     summary: Obtener el perfil del usuario autenticado
  *     tags: [Usuarios]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Perfil del usuario autenticado
- *       401:
- *         description: Token inválido o ausente
- */
-router.get("/profile", protect, getProfile);
-
-/**
- * @swagger
- * /users/me:
- *   get:
- *     summary: Obtener el perfil completo del usuario autenticado
- *     tags: [Usuarios]
- *     description: Devuelve los datos del usuario actual, incluyendo nombre, email, puntos y avatar.
+ *     description: Devuelve los datos del usuario actual, incluyendo nombre, email, puntos y avatar
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -127,7 +110,7 @@ router.get("/profile", protect, getProfile);
  *       401:
  *         description: Token inválido o expirado
  */
-router.get("/me", protect, getUserProfile);
+router.get("/profile", protect, getProfile);
 
 /**
  * @swagger
