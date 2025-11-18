@@ -16,7 +16,7 @@ def add_default_data(db: Session):
 
     categories = [
         models.Category(name="🎤 Música en Español", description="Éxitos en español"),
-        models.Category(name="🎸 Rock", description="Clásicos del rock"),
+        models.Category(name="📅 Adivina el Año", description="¿En qué año salió esta canción?"),
         models.Category(name="🕺 70s y 80s", description="Temazos de las décadas doradas"),
     ]
     db.add_all(categories)
@@ -27,9 +27,13 @@ def add_default_data(db: Session):
         {"title": "La Flaca", "artist": "Jarabe de Palo", "release_year": "1996", "category_id": 1},
         {"title": "Corazón Partío", "artist": "Alejandro Sanz", "release_year": "1997", "category_id": 1},
 
-        # Rock
+        # Adivina el Año
         {"title": "Smells Like Teen Spirit", "artist": "Nirvana", "release_year": "1991", "category_id": 2},
         {"title": "Bohemian Rhapsody", "artist": "Queen", "release_year": "1975", "category_id": 2},
+        {"title": "Thriller", "artist": "Michael Jackson", "release_year": "1982", "category_id": 2},
+        {"title": "Hotel California", "artist": "Eagles", "release_year": "1976", "category_id": 2},
+        {"title": "Sweet Child O' Mine", "artist": "Guns N' Roses", "release_year": "1987", "category_id": 2},
+        {"title": "Wonderwall", "artist": "Oasis", "release_year": "1995", "category_id": 2},
 
         # 70s y 80s
         {"title": "Billie Jean", "artist": "Michael Jackson", "release_year": "1982", "category_id": 3},

@@ -15,6 +15,7 @@ export default function GamePage() {
   const [feedback, setFeedback] = useState("");
   const [finished, setFinished] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isYearMode, setIsYearMode] = useState(false);
   const iframeRef = useRef(null);
 
   useEffect(() => {
@@ -32,6 +33,11 @@ export default function GamePage() {
       setLoading(true);
       const data = await startGame(category);
       setGame(data);
+      
+      // Detectar si es modo "Adivina el Año" (categoría 2)
+      const yearMode = category === "2";
+      setIsYearMode(yearMode);
+      
       setFragmentTime(5);
       setFragmentIndex(0);
       setGuess("");
@@ -61,8 +67,14 @@ export default function GamePage() {
     if (widget) {
       widget.seekTo(0);
       widget.play();
-      setFeedback("🎧 Escuchando fragmento...");
-      setTimeout(() => widget.pause(), fragmentTime * 1000);
+      
+      if (isYearMode) {
+        setFeedback("🎧 Escuchando 30 segundos...");
+        setTimeout(() => widget.pause(), 30000); // 30 segundos en modo año
+      } else {
+        setFeedback("🎧 Escuchando fragmento...");
+        setTimeout(() => widget.pause(), fragmentTime * 1000);
+      }
     }
   };
 
@@ -80,8 +92,13 @@ export default function GamePage() {
 const skipFragment = async () => {
   if (fragmentIndex < 4) {
     setFragmentIndex(fragmentIndex + 1);
-    setFragmentTime(fragmentTime + 5);
-    setFeedback("⏭ Nuevo fragmento desbloqueado");
+    
+    if (!isYearMode) {
+      setFragmentTime(fragmentTime + 5);
+      setFeedback("⏭ Nuevo fragmento desbloqueado");
+    } else {
+      setFeedback(`⏭ Intento ${fragmentIndex + 2}/5`);
+    }
   } else {
     setFinished(true);
     playFullTrack();
@@ -95,13 +112,25 @@ const skipFragment = async () => {
       });
       
       if (res.ok) {
-        setFeedback(`💀 Fin del juego. La canción era: ${game.title} (-8 pts)`);
+        if (isYearMode) {
+          setFeedback(`💀 Fin del juego. El año era: ${game.release_year} (-8 pts)`);
+        } else {
+          setFeedback(`💀 Fin del juego. La canción era: ${game.title} (-8 pts)`);
+        }
       } else {
-        setFeedback(`💀 Fin del juego. La canción era: ${game.title}`);
+        if (isYearMode) {
+          setFeedback(`💀 Fin del juego. El año era: ${game.release_year}`);
+        } else {
+          setFeedback(`💀 Fin del juego. La canción era: ${game.title}`);
+        }
       }
     } catch (error) {
       console.error("⚠️ Error al restar puntos:", error);
-      setFeedback(`💀 Fin del juego. La canción era: ${game.title}`);
+      if (isYearMode) {
+        setFeedback(`💀 Fin del juego. El año era: ${game.release_year}`);
+      } else {
+        setFeedback(`💀 Fin del juego. La canción era: ${game.title}`);
+      }
     }
   }
 };
@@ -112,33 +141,64 @@ const handleGuess = async () => {
   const username = localStorage.getItem("username");
   const attempt = fragmentIndex + 1;
 
-  const res = await fetch(
-    `http://localhost:8002/game/check?title=${encodeURIComponent(game.title)}&guess=${encodeURIComponent(guess)}`,
-    {
-      method: "POST",
-      headers: {
-        "X-Username": username,
-        "X-Attempt": attempt
+  // Modo año: usar endpoint diferente
+  if (isYearMode) {
+    const res = await fetch(
+      `http://localhost:8002/game/check-year?release_year=${encodeURIComponent(game.release_year)}&guess=${encodeURIComponent(guess)}`,
+      {
+        method: "POST",
+        headers: {
+          "X-Username": username,
+          "X-Attempt": attempt
+        }
+      }
+    );
+    const data = await res.json();
+
+    if (data.correct) {
+      const feedbackMsg = `🎉 ¡Correcto! Era ${data.year} (+${data.points} pts)`;
+      setFeedback(feedbackMsg);
+      setFinished(true);
+      playFullTrack(true);
+    } else {
+      if (attempt >= 5) {
+        setFeedback(`❌ Incorrecto. El año era: ${data.year} (-8 pts)`);
+        setFinished(true);
+        playFullTrack();
+      } else {
+        setFragmentIndex(fragmentIndex + 1);
+        setFeedback(`❌ Incorrecto, intenta de nuevo (${attempt}/5)`);
       }
     }
-  );
-  const data = await res.json();
-
-  if (data.correct) {
-    const feedbackMsg = `🎉 ¡Correcto! Era "${data.title}" (+${data.points} pts)`;
-    console.log("📢 Estableciendo feedback:", feedbackMsg);
-    setFeedback(feedbackMsg);
-    setFinished(true);
-    playFullTrack(true); // 👈 Mantener el feedback de victoria
   } else {
-    // Mostrar feedback temporal antes de skip
-    if (attempt >= 5) {
-      setFeedback(`❌ Incorrecto. La canción era: ${game.title} (-8 pts)`);
+    // Modo título original
+    const res = await fetch(
+      `http://localhost:8002/game/check?title=${encodeURIComponent(game.title)}&guess=${encodeURIComponent(guess)}`,
+      {
+        method: "POST",
+        headers: {
+          "X-Username": username,
+          "X-Attempt": attempt
+        }
+      }
+    );
+    const data = await res.json();
+
+    if (data.correct) {
+      const feedbackMsg = `🎉 ¡Correcto! Era "${data.title}" (+${data.points} pts)`;
+      console.log("📢 Estableciendo feedback:", feedbackMsg);
+      setFeedback(feedbackMsg);
       setFinished(true);
-      playFullTrack();
+      playFullTrack(true);
     } else {
-      setFeedback(`❌ Incorrecto, intenta de nuevo`);
-      skipFragment();
+      if (attempt >= 5) {
+        setFeedback(`❌ Incorrecto. La canción era: ${game.title} (-8 pts)`);
+        setFinished(true);
+        playFullTrack();
+      } else {
+        setFeedback(`❌ Incorrecto, intenta de nuevo`);
+        skipFragment();
+      }
     }
   }
   setGuess("");
@@ -192,7 +252,7 @@ const handleGuess = async () => {
               }}
             >
               <h3 className="text-info mb-3 fw-bold">
-                🎧 Adivina la canción ({category})
+                {isYearMode ? "📅 Adivina el Año" : `🎧 Adivina la canción (${category})`}
               </h3>
 
               {/* 🎵 Widget oculto */}
@@ -221,20 +281,22 @@ const handleGuess = async () => {
                     className="fw-semibold px-4 py-2"
                     onClick={playFragment}
                   >
-                    ▶️ Reproducir fragmento {fragmentIndex + 1} ({fragmentTime}s)
+                    {isYearMode 
+                      ? "▶️ Reproducir canción (30s)" 
+                      : `▶️ Reproducir fragmento ${fragmentIndex + 1} (${fragmentTime}s)`}
                   </Button>
 
                   <Form className="mt-4 position-relative">
                     <Form.Control
                       type="text"
-                      placeholder="🎵 ¿Lo sabes? Escribe el título..."
+                      placeholder={isYearMode ? "📅 ¿En qué año salió? (ej: 1991)" : "🎵 ¿Lo sabes? Escribe el título..."}
                       value={guess}
-                      onChange={(e) => handleSearch(e.target.value)}
+                      onChange={(e) => isYearMode ? setGuess(e.target.value) : handleSearch(e.target.value)}
                       className="bg-dark text-white border-secondary mb-3 text-center"
                       style={{ fontSize: "1.1rem", borderRadius: "10px" }}
                     />
 
-                    {suggestions.length > 0 && (
+                    {!isYearMode && suggestions.length > 0 && (
                       <ListGroup
                         className="position-absolute w-100 text-start"
                         style={{

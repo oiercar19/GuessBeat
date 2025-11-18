@@ -124,6 +124,43 @@ def search_song(query: str):
     return filtered
 
 
+@router.post("/check-year")
+def check_year_guess(
+    release_year: str = Query(...),
+    guess: str = Query(...),
+    request: Request = None
+):
+    """
+    Comprueba si el jugador ha adivinado el año de lanzamiento.
+    Calcula puntos según el intento (5 intentos disponibles).
+    """
+    username = request.headers.get("X-Username")
+    attempt = int(request.headers.get("X-Attempt", 1))
+
+    # Sistema de puntos para modo año (5 intentos)
+    points_table = {1: 10, 2: 8, 3: 6, 4: 4, 5: 2}
+    points = 0
+
+    # Normalizar años (eliminar espacios y verificar)
+    correct_year = release_year.strip()
+    guessed_year = guess.strip()
+
+    is_correct = correct_year == guessed_year
+
+    if is_correct:
+        points = points_table.get(attempt, 0)
+        if username:
+            update_user_points(username, points)
+        return {"correct": True, "year": correct_year, "points": points}
+
+    # Si falla en el último intento
+    if attempt >= 5 and username:
+        update_user_points(username, -8)
+        points = -8
+
+    return {"correct": False, "points": points, "year": correct_year}
+
+
 @router.post("/check")
 def check_guess(
     title: str = Query(...),

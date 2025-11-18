@@ -50,8 +50,8 @@ export default function HomePage() {
 
   // 🖼️ Imagenes para cada categoría (usa las tuyas o links de stock)
   const categoryImages = {
-    1: "julio.webp", // Música en español
-    2: "rock.jpg",    // Rock
+    1: "julio.webp",   // Música en español
+    2: "calendario.webp", // Adivina el Año
     3: "70s80s.jpg",   // Años 70 y 80
   };
 
