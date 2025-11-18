@@ -7,6 +7,33 @@ const TARGET = process.env.GAME_SERVICE_URL || "http://localhost:8002";
 
 console.log(`🎯 [Categories Proxy] Target: ${TARGET}`);
 
+/**
+ * @swagger
+ * /categories:
+ *   get:
+ *     summary: Obtener todas las categorías de música disponibles
+ *     tags: [Categories]
+ *     responses:
+ *       200:
+ *         description: Lista de categorías musicales
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     example: 1
+ *                   name:
+ *                     type: string
+ *                     example: "Rock"
+ *                   description:
+ *                     type: string
+ *                     example: "Música rock clásica y moderna"
+ */
+
 const categoriesProxy = createProxyMiddleware({
     target: TARGET,
     changeOrigin: true,
