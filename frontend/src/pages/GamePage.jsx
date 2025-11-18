@@ -17,7 +17,6 @@ export default function GamePage() {
   const [loading, setLoading] = useState(true);
   const iframeRef = useRef(null);
 
-  // 1️⃣ Cargar SDK de SoundCloud
   useEffect(() => {
     if (!window.SC) {
       const script = document.createElement("script");
@@ -28,7 +27,6 @@ export default function GamePage() {
     }
   }, []);
 
-  // 2️⃣ Inicializar partida
   const initGame = async () => {
     try {
       setLoading(true);
@@ -51,7 +49,7 @@ export default function GamePage() {
     initGame();
   }, [category]);
 
-  // 3️⃣ Configurar widget
+
   useEffect(() => {
     if (iframeRef.current && window.SC && game?.permalink_url) {
       const player = window.SC.Widget(iframeRef.current);
@@ -68,71 +66,85 @@ export default function GamePage() {
     }
   };
 
-  const playFullTrack = () => {
+  const playFullTrack = (keepFeedback = false) => {
     if (widget) {
       widget.seekTo(0);
       widget.play();
-      setFeedback("🎶 Reproduciendo la canción completa...");
+      if (!keepFeedback) {
+        setFeedback("🎶 Reproduciendo la canción completa...");
+      }
       setTimeout(() => widget.pause(), 30000); // 🔊 30 s
     }
   };
 
-  const skipFragment = async () => {
-    if (fragmentIndex < 4) {
-      setFragmentIndex(fragmentIndex + 1);
-      setFragmentTime(fragmentTime + 5);
-      setFeedback("⏭ Nuevo fragmento desbloqueado");
-    } else {
-      // 👉 Fin del juego sin adivinar
-      setFeedback(`💀 Fin del juego. La canción era: ${game.title} (-8 pts)`);
-      setFinished(true);
-      playFullTrack();
-
-      // ⚠️ Restar puntos al usuario
-      const username = localStorage.getItem("username");
-      try {
-        await fetch("http://localhost:5001/api/users/update-stats", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, points: -8 }),
-        });
-      } catch (error) {
-        console.error("⚠️ Error al restar puntos:", error);
-      }
-    }
-  };
-
-  const handleGuess = async () => {
-    if (!guess.trim()) return;
+const skipFragment = async () => {
+  if (fragmentIndex < 4) {
+    setFragmentIndex(fragmentIndex + 1);
+    setFragmentTime(fragmentTime + 5);
+    setFeedback("⏭ Nuevo fragmento desbloqueado");
+  } else {
+    setFinished(true);
+    playFullTrack();
 
     const username = localStorage.getItem("username");
-    const attempt = fragmentIndex + 1;
-
-    const res = await fetch(
-      `http://localhost:8002/game/check?title=${encodeURIComponent(game.title)}&guess=${encodeURIComponent(guess)}`,
-      {
+    try {
+      const res = await fetch("http://localhost:5001/api/users/update-stats", {
         method: "POST",
-        headers: {
-          "X-Username": username,
-          "X-Attempt": attempt
-        }
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, points: -8 }),
+      });
+      
+      if (res.ok) {
+        setFeedback(`💀 Fin del juego. La canción era: ${game.title} (-8 pts)`);
+      } else {
+        setFeedback(`💀 Fin del juego. La canción era: ${game.title}`);
       }
-    );
+    } catch (error) {
+      console.error("⚠️ Error al restar puntos:", error);
+      setFeedback(`💀 Fin del juego. La canción era: ${game.title}`);
+    }
+  }
+};
+
+const handleGuess = async () => {
+  if (!guess.trim()) return;
+
+  const username = localStorage.getItem("username");
+  const attempt = fragmentIndex + 1;
+
+  const res = await fetch(
+    `http://localhost:8002/game/check?title=${encodeURIComponent(game.title)}&guess=${encodeURIComponent(guess)}`,
+    {
+      method: "POST",
+      headers: {
+        "X-Username": username,
+        "X-Attempt": attempt
+      }
+    }
+  );
   const data = await res.json();
 
   if (data.correct) {
-    setFeedback(`🎉 ¡Correcto! Era "${data.title}" (+${data.points} pts)`);
+    const feedbackMsg = `🎉 ¡Correcto! Era "${data.title}" (+${data.points} pts)`;
+    console.log("📢 Estableciendo feedback:", feedbackMsg);
+    setFeedback(feedbackMsg);
     setFinished(true);
-    playFullTrack();
+    playFullTrack(true); // 👈 Mantener el feedback de victoria
   } else {
-    skipFragment();
+    // Mostrar feedback temporal antes de skip
+    if (attempt >= 5) {
+      setFeedback(`❌ Incorrecto. La canción era: ${game.title} (-8 pts)`);
+      setFinished(true);
+      playFullTrack();
+    } else {
+      setFeedback(`❌ Incorrecto, intenta de nuevo`);
+      skipFragment();
+    }
   }
   setGuess("");
   setSuggestions([]);
 };
 
-
-  // 🔍 Buscar canciones
   const handleSearch = async (text) => {
     setGuess(text);
     if (text.length > 2) {
@@ -273,6 +285,9 @@ export default function GamePage() {
                       height="150"
                       className="rounded mb-3 shadow"
                       style={{ objectFit: "cover" }}
+                      onError={(e) => {
+                        e.target.src = "/musica.webp";
+                      }}
                     />
                     <p className="fs-5 text-center">
                       🎵 <strong>{game.title}</strong>
