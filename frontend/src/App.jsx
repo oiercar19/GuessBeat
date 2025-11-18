@@ -6,6 +6,7 @@ import ChatPage from "./pages/ChatPage";
 import RankingPage from "./pages/RankingPage";
 import ProfilePage from "./pages/ProfilePage";
 import GamePage from "./pages/GamePage";
+import AdminPage from "./pages/AdminPage";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="/ranking" element={<RankingPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/game/:category" element={<GamePage />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Routes>
     </Router>
   );

@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query, Request, HTTPException
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 import re
 import requests
 from app.db.database import get_db
@@ -7,6 +8,14 @@ from app.db import crud
 from app.services.soundcloud import search_tracks
 
 router = APIRouter()
+
+class SongCreate(BaseModel):
+    title: str
+    artist: str
+    release_year: str
+    category_id: int
+    permalink_url: str = None
+    artwork: str = None
 
 games = {}
 
@@ -16,6 +25,16 @@ def start_game(category: int = Query(..., description="ID de la categoría"), db
     song = crud.get_random_song_by_category(db, category)
     if not song:
         return {"error": "No hay canciones en esta categoría"}
+
+    # Si la canción ya tiene permalink_url guardado, usarlo directamente
+    if song.permalink_url and song.artwork:
+        return {
+            "title": song.title,
+            "artist": song.artist,
+            "release_year": song.release_year,
+            "artwork": song.artwork,
+            "permalink_url": song.permalink_url,
+        }
 
     # 🔍 Buscar con título + artista para mejor precisión
     search_query = f"{song.title} {song.artist}" if song.artist else song.title
@@ -264,6 +283,33 @@ def update_user_points(username: str, points: int):
             print(f"⚠️ Error al actualizar puntos: {res.text}")
     except Exception as e:
         print(f"❌ No se pudo conectar con el microservicio de usuarios: {e}")
+
+
+@router.post("/songs")
+def create_song(song: SongCreate, db: Session = Depends(get_db)):
+    """Endpoint para que el admin añada canciones manualmente."""
+    try:
+        new_song = crud.add_song(
+            db=db,
+            title=song.title,
+            artist=song.artist,
+            release_year=song.release_year,
+            category_id=song.category_id,
+            permalink_url=song.permalink_url,
+            artwork=song.artwork
+        )
+        return {
+            "message": "Canción añadida correctamente",
+            "song": {
+                "id": new_song.id,
+                "title": new_song.title,
+                "artist": new_song.artist,
+                "release_year": new_song.release_year,
+                "category_id": new_song.category_id
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 

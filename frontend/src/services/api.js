@@ -137,3 +137,9 @@ export const searchSongs = async (query) => {
   const res = await axios.get(`http://localhost:8002/game/search?query=${query}`);
   return res.data;
 };
+
+// --- ADMIN ---
+export const createSong = async (songData) => {
+  const res = await axios.post(`http://localhost:8002/game/songs`, songData);
+  return res.data;
+};

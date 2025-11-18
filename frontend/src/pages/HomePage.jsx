@@ -35,6 +35,7 @@ export default function HomePage() {
         localStorage.setItem("avatarIndex", userData.avatarIndex ?? 0);
 
         const cats = await getCategories();
+        console.log("📋 Categorías cargadas:", cats);
         setCategories(cats);
       } catch (error) {
         console.error("❌ Error:", error);

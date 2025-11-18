@@ -56,6 +56,15 @@ export default function AppNavbar() {
           >
             🏆 Ranking
           </Button>
+          {localStorage.getItem("username") === "admin" && (
+            <Button
+              variant="outline-success"
+              onClick={() => navigate("/admin")}
+              className="fw-semibold"
+            >
+              ⚙️ Admin
+            </Button>
+          )}
           <Button
             variant="outline-danger"
             onClick={handleLogout}

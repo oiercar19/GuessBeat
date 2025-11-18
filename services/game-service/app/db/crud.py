@@ -9,6 +9,21 @@ def get_random_song_by_category(db: Session, category_id: int):
     songs = db.query(models.Song).filter(models.Song.category_id == category_id).all()
     return random.choice(songs) if songs else None
 
+def add_song(db: Session, title: str, artist: str, release_year: str, category_id: int, permalink_url: str = None, artwork: str = None):
+    """Añade una nueva canción a la base de datos."""
+    song = models.Song(
+        title=title,
+        artist=artist,
+        release_year=release_year,
+        category_id=category_id,
+        permalink_url=permalink_url,
+        artwork=artwork
+    )
+    db.add(song)
+    db.commit()
+    db.refresh(song)
+    return song
+
 def add_default_data(db: Session):
     """Inserta categorías y canciones iniciales si no existen."""
     if db.query(models.Category).count() > 0:
