@@ -1,24 +1,42 @@
-import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
+import dotenv from "dotenv";
 
-const router = express.Router();
+dotenv.config();
 
-router.use(
-  "/",
-  createProxyMiddleware({
-    target: process.env.GAME_SERVICE_URL || "http://localhost:8002",
-    changeOrigin: true,
-    // ✅ No reescribas el path (mantén /game en el microservicio)
-    onProxyReq: (proxyReq, req, res) => {
-      console.log(`🎮 Proxy -> ${req.method} ${req.originalUrl}`);
-    },
-    onError: (err, req, res) => {
-      console.error("❌ Error en el proxy de GAME:", err);
-      res
-        .status(500)
-        .json({ message: "Error en el proxy del microservicio de juego" });
-    },
-  })
-);
+const TARGET = process.env.GAME_SERVICE_URL || "http://localhost:8002";
 
-export default router;
+console.log(`🎯 [Game Proxy] Target: ${TARGET}`);
+
+const gameProxy = createProxyMiddleware({
+  target: TARGET,
+  changeOrigin: true,
+
+  pathRewrite: (path, req) => {
+    // Si la ruta es /categories, la deja como está
+    if (path.startsWith('/categories')) {
+      console.log(`🔀 [Game Proxy] ${req.method} ${req.originalUrl} → ${TARGET}${path}`);
+      return path;
+    }
+    // Si no, añade /game/ al principio
+    const newPath = '/game' + path;
+    console.log(`🔀 [Game Proxy] ${req.method} ${req.originalUrl} → ${TARGET}${newPath}`);
+    return newPath;
+  },
+
+  onProxyRes: (proxyRes, req) => {
+    console.log(`✅ [Game Proxy] Response ${proxyRes.statusCode} from ${req.originalUrl}`);
+  },
+
+  onError: (err, req, res) => {
+    console.error(`❌ [Game Proxy] Error: ${err.message}`);
+    if (!res.headersSent) {
+      res.status(502).json({
+        error: "No se pudo conectar con el servicio de juego",
+        message: err.message,
+        target: TARGET
+      });
+    }
+  }
+});
+
+export default gameProxy;

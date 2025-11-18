@@ -1,5 +1,4 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
-import axios from "axios";
 
 export const registerUser = async (username, email, password) => {
   const res = await fetch(`${API_URL}/users/register`, {
@@ -117,29 +116,42 @@ export const getCategories = async () => {
 };
 
 export const startGame = async (category) => {
-  const res = await axios.get(`http://localhost:8002/game/start?category=${category}`);
-  return res.data;
+  const res = await fetch(`${API_URL}/game/start?category=${category}`);
+  if (!res.ok) throw new Error("Error al iniciar el juego");
+  return res.json();
 };
 
 export const getFragment = async (gameId, index) => {
-  const res = await axios.get(`http://localhost:8002/game/fragment/${gameId}?index=${index}`);
-  return res.data;
+  const res = await fetch(`${API_URL}/game/fragment/${gameId}?index=${index}`);
+  if (!res.ok) throw new Error("Error al obtener fragmento");
+  return res.json();
 };
 
 export const checkGuess = async (title, guess) => {
-  const res = await axios.post(`http://localhost:8002/game/check`, null, {
-    params: { title, guess },
+  const res = await fetch(`${API_URL}/game/check?title=${encodeURIComponent(title)}&guess=${encodeURIComponent(guess)}`, {
+    method: "POST",
   });
-  return res.data;
+  if (!res.ok) throw new Error("Error al verificar respuesta");
+  return res.json();
 };
 
 export const searchSongs = async (query) => {
-  const res = await axios.get(`http://localhost:8002/game/search?query=${query}`);
-  return res.data;
+  const res = await fetch(`${API_URL}/game/search?query=${encodeURIComponent(query)}`);
+  if (!res.ok) throw new Error("Error al buscar canciones");
+  return res.json();
 };
 
 // --- ADMIN ---
 export const createSong = async (songData) => {
-  const res = await axios.post(`http://localhost:8002/game/songs`, songData);
-  return res.data;
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/game/songs`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(songData),
+  });
+  if (!res.ok) throw new Error("Error al crear canción");
+  return res.json();
 };

@@ -20,7 +20,6 @@ app.use(cors({
 
 app.use(morgan("dev"));
 
-// ✅ Ambas rutas pasan al mismo proxy
 app.use("/api/users", usersProxy);
 app.use("/api/chat", chatProxy);
 app.use("/api/users/ranking", rankingProxy);
