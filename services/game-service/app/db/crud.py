@@ -5,9 +5,17 @@ from app.db import models
 def get_categories(db: Session):
     return db.query(models.Category).all()
 
-def get_random_song_by_category(db: Session, category_id: int):
-    songs = db.query(models.Song).filter(models.Song.category_id == category_id).all()
-    return random.choice(songs) if songs else None
+def get_random_song_by_category(db: Session, category_id: int, exclude_ids: list = None):
+    query = db.query(models.Song).filter(models.Song.category_id == category_id)
+    
+    if exclude_ids:
+        songs_excluded = query.filter(models.Song.id.notin_(exclude_ids)).all()
+        # Si quedan canciones después de excluir, usar esas
+        if songs_excluded:
+            return random.choice(songs_excluded)
+    
+    all_songs = query.all()
+    return random.choice(all_songs) if all_songs else None
 
 def add_song(db: Session, title: str, artist: str, release_year: str, category_id: int, permalink_url: str = None, artwork: str = None):
     """Añade una nueva canción a la base de datos."""

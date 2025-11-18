@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import re
 import requests
+from collections import defaultdict, deque
 from app.db.database import get_db
 from app.db import crud
 from app.services.soundcloud import search_tracks
@@ -19,12 +20,21 @@ class SongCreate(BaseModel):
 
 games = {}
 
+song_history = defaultdict(lambda: deque(maxlen=5))  # Guarda las últimas 5 canciones por categoría
+
 @router.get("/start")
 def start_game(category: int = Query(..., description="ID de la categoría"), db: Session = Depends(get_db)):
     """Selecciona una canción aleatoria desde la DB y obtiene su stream de SoundCloud."""
-    song = crud.get_random_song_by_category(db, category)
+    # Obtener historial de canciones recientes para esta categoría
+    recent_song_ids = list(song_history[category])
+    
+    # Seleccionar canción evitando las recientes
+    song = crud.get_random_song_by_category(db, category, exclude_ids=recent_song_ids)
     if not song:
         return {"error": "No hay canciones en esta categoría"}
+    
+    # Añadir la canción al historial
+    song_history[category].append(song.id)
 
     # Si la canción ya tiene permalink_url guardado, usarlo directamente
     if song.permalink_url and song.artwork:
@@ -36,11 +46,9 @@ def start_game(category: int = Query(..., description="ID de la categoría"), db
             "permalink_url": song.permalink_url,
         }
 
-    # 🔍 Buscar con título + artista para mejor precisión
     search_query = f"{song.title} {song.artist}" if song.artist else song.title
     results = search_tracks(search_query)
     
-    # Si no encuentra nada con artista, intenta solo con el título
     if not results and song.artist:
         results = search_tracks(song.title)
     
