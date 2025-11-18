@@ -211,7 +211,8 @@ router.post("/update-stats", async (req, res) => {
     const user = await User.findOne({ username });
     if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
 
-    user.stats = (user.stats || 0) + points;
+    // Asegurar que la puntuación nunca sea negativa
+    user.stats = Math.max(0, (user.stats || 0) + points);
     await user.save();
 
     res.json({ message: "Puntos actualizados", newStats: user.stats });

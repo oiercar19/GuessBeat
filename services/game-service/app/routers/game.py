@@ -184,6 +184,8 @@ def check_year_guess(
     if attempt >= 5 and username:
         update_user_points(username, -8)
         points = -8
+    else:
+        points = 0
 
     return {"correct": False, "points": points, "year": correct_year}
 
@@ -276,6 +278,8 @@ def check_guess(
     if attempt >= 5 and username:
         update_user_points(username, -8)
         points = -8
+    else:
+        points = 0
 
     return {"correct": False, "points": points}
 
