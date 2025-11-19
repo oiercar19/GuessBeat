@@ -36,32 +36,34 @@ def start_game(category: int = Query(..., description="ID de la categoría"), db
     # Añadir la canción al historial
     song_history[category].append(song.id)
 
-    # Si la canción ya tiene permalink_url guardado, usarlo directamente
-    if song.permalink_url and song.artwork:
-        return {
-            "title": song.title,
-            "artist": song.artist,
-            "release_year": song.release_year,
-            "artwork": song.artwork,
-            "permalink_url": song.permalink_url,
-        }
-
-    search_query = f"{song.title} {song.artist}" if song.artist else song.title
-    results = search_tracks(search_query)
+    # Intentar usar los datos guardados en la BD
+    permalink = song.permalink_url
+    artwork = song.artwork
     
-    if not results and song.artist:
-        results = search_tracks(song.title)
+    # Solo buscar en SoundCloud si faltan datos
+    if not permalink or not artwork:
+        search_query = f"{song.title} {song.artist}" if song.artist else song.title
+        results = search_tracks(search_query)
+        
+        if not results and song.artist:
+            results = search_tracks(song.title)
+        
+        if not results:
+            return {"error": f"No se encontró '{song.title}' en SoundCloud"}
+        
+        sc_track = results[0]
+        # Usar datos de SoundCloud solo para lo que falta
+        if not permalink:
+            permalink = sc_track["permalink_url"]
+        if not artwork:
+            artwork = sc_track["artwork"]
     
-    if not results:
-        return {"error": f"No se encontró '{song.title}' en SoundCloud"}
-
-    sc_track = results[0]
     return {
         "title": song.title,
-        "artist": song.artist or sc_track["artist"],
+        "artist": song.artist,
         "release_year": song.release_year,
-        "artwork": sc_track["artwork"],
-        "permalink_url": sc_track["permalink_url"],
+        "artwork": artwork,
+        "permalink_url": permalink,
     }
 
 
