@@ -254,8 +254,8 @@ def check_guess(
     points_table = {1: 10, 2: 8, 3: 6, 4: 4, 5: 2}
     points = 0
 
-    # --- Comprobación más estricta ---
-    # Solo acepta coincidencias exactas, no parciales
+    # --- Comprobación flexible ---
+    # Acepta si el nombre de la canción está contenido en la respuesta (para autocompletado)
     is_correct = (
         # Coincidencia exacta del nombre de la canción
         title_song == guess_song or
@@ -267,7 +267,11 @@ def check_guess(
         # Permitir que el usuario escriba solo la canción cuando el título tiene "Artista - Canción"
         (title_artist and not guess_artist and title_song == guess_song) or
         # Permitir que el usuario escriba solo la canción cuando el título tiene "Canción - Artista"
-        (title_artist and not guess_artist and title_artist == guess_song)
+        (title_artist and not guess_artist and title_artist == guess_song) or
+        # Aceptar si el nombre de la canción está contenido en la respuesta (ej: autocompletado)
+        title_song in guess_full or
+        # Aceptar si cualquier parte del título está en la respuesta
+        (title_artist and title_artist in guess_full and title_song in guess_full)
     )
 
     if is_correct:
