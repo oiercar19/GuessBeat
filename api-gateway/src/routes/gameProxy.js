@@ -175,10 +175,11 @@ const gameProxy = createProxyMiddleware({
   changeOrigin: true,
 
   pathRewrite: (path, req) => {
-    // Si la ruta es /categories, la deja como está
+    // Si la ruta es /categories, asegura que termine con /
     if (path.startsWith('/categories')) {
-      console.log(`🔀 [Game Proxy] ${req.method} ${req.originalUrl} → ${TARGET}${path}`);
-      return path;
+      const fixedPath = path === '/categories' ? '/categories/' : path;
+      console.log(`🔀 [Game Proxy] ${req.method} ${req.originalUrl} → ${TARGET}${fixedPath}`);
+      return fixedPath;
     }
     // Si no, añade /game/ al principio
     const newPath = '/game' + path;

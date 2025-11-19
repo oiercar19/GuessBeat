@@ -17,12 +17,18 @@ services:
     container_name: mysql
     restart: always
     ports:
-      - "3306:3306"
+      - "3307:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=guessbeat
     volumes:
       - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
 
   # 🚀 Microservicio de usuarios
   user-service:
@@ -56,8 +62,10 @@ services:
       - MYSQL_DB=guessbeat
       - SOUNDCLOUD_CLIENT_ID=${SOUNDCLOUD_CLIENT_ID}
       - SOUNDCLOUD_CLIENT_SECRET=${SOUNDCLOUD_CLIENT_SECRET}
+      - USER_SERVICE_URL=http://user-service:5001
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
 
   # 🌐 API Gateway
   api-gateway:
