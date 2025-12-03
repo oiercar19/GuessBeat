@@ -1,20 +1,15 @@
 import RegisterForm from "../components/RegisterForm";
 import { Link } from "react-router-dom";
 import { Container } from "react-bootstrap";
+import "./RegisterPage.css";
 
 export default function RegisterPage() {
   return (
-    <Container
-      fluid
-      className="d-flex flex-column align-items-center justify-content-center min-vh-100"
-      style={{
-        background: "linear-gradient(135deg, #1a1a40, #2e2e72, #000)",
-      }}
-    >
+    <Container fluid className="register-page">
       <RegisterForm />
-      <p className="text-light mt-4">
+      <p className="register-page__login-text">
         ¿Ya tienes cuenta?{" "}
-        <Link to="/" className="text-info fw-semibold">
+        <Link to="/" className="register-page__login-link">
           Inicia sesión
         </Link>
       </p>

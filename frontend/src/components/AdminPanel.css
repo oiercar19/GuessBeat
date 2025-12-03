@@ -1,0 +1,33 @@
+.admin-card {
+    background: rgba(25, 25, 40, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Estilos personalizados para los inputs y selects */
+.custom-input {
+    background-color: rgba(255, 255, 255, 0.1) !important; /* !important para sobreescribir Bootstrap */
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Estado de foco (cuando haces clic en el input) */
+.custom-input:focus {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    border-color: #0dcaf0; /* Color cyan/info de bootstrap */
+    box-shadow: 0 0 0 0.25rem rgba(13, 202, 240, 0.25);
+    color: #fff !important;
+}
+
+/* Estilo para las opciones del desplegable */
+.custom-input option {
+    background-color: #1a1a2e;
+    color: white;
+}
+
+/* Estilos para el botón */
+.custom-btn {
+    border-radius: 10px;
+}

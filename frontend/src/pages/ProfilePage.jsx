@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Container, Card, Form, Button, Image, Row, Col, Alert } from "react-bootstrap";
 import { getProfile, updateProfile } from "../services/api";
 import AppNavbar from "../components/Navbar";
+import "./ProfilePage.css";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ export default function ProfilePage() {
       setMsg(updated.message);
       setError("");
       setPassword("");
-      localStorage.setItem("avatarIndex", avatarIndex); // 💾 Guarda nuevo avatar
+      localStorage.setItem("avatarIndex", avatarIndex);
       navigate("/home");
     } catch (err) {
       setError(err.message);
@@ -45,78 +46,64 @@ export default function ProfilePage() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #111, #1a1a40, #000)",
-        color: "#fff",
-        paddingTop: "100px",
-      }}
-    >
+    <div className="profile-page">
       <AppNavbar />
-      <Container className="d-flex flex-column align-items-center">
-        <Card
-          className="p-4 shadow-lg text-white w-100"
-          style={{
-            background: "rgba(25,25,40,0.9)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            maxWidth: "700px",
-          }}
-        >
-          <h3 className="text-center text-info mb-4">👤 Mi Perfil</h3>
+      <Container className="profile-page__container">
+        <Card className="profile-card p-4 shadow-lg text-white w-100">
+          <h3 className="profile-card__title">👤 Mi Perfil</h3>
 
           {msg && <Alert variant="success">{msg}</Alert>}
           {error && <Alert variant="danger">{error}</Alert>}
 
           {user ? (
             <Form onSubmit={handleSubmit}>
-              <div className="text-center mb-4">
+              <div className="profile-card__avatar-section">
                 <Image
                   src={`/avatars/${avatarIndex}.jpg`}
                   width={100}
                   height={100}
                   roundedCircle
-                  className="border border-3 border-info shadow-sm mb-3"
+                  className="profile-card__avatar shadow-sm"
                   alt="Avatar"
                 />
-                <p className=" small">
-                  Puntos: <span className="text-warning">{user.stats}</span>
+                <p className="profile-card__points">
+                  Puntos: <span className="profile-card__points-value">{user.stats}</span>
                 </p>
               </div>
 
               <Form.Group className="mb-3">
-                <Form.Label>Usuario</Form.Label>
+                <Form.Label className="profile-card__form-label">Usuario</Form.Label>
                 <Form.Control
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="bg-dark text-white border-secondary"
+                  className="profile-card__input"
                 />
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label>Email</Form.Label>
+                <Form.Label className="profile-card__form-label">Email</Form.Label>
                 <Form.Control
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-dark text-white border-secondary"
+                  className="profile-card__input"
                 />
               </Form.Group>
 
               <Form.Group className="mb-3">
-                <Form.Label>Nueva contraseña</Form.Label>
+                <Form.Label className="profile-card__form-label">Nueva contraseña</Form.Label>
                 <Form.Control
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Dejar vacío para no cambiar"
-                  className="bg-dark text-white border-secondary"
+                  className="profile-card__input"
                 />
               </Form.Group>
 
-              <h5 className="text-info mt-4 mb-3">🎨 Selecciona tu avatar (-500 puntos)</h5>
-              <Row className="text-center">
+              <h5 className="profile-card__avatar-title">🎨 Selecciona tu avatar (-500 puntos)</h5>
+              <Row className="profile-card__avatar-grid">
                 {Array.from({ length: 18 }, (_, idx) => idx + 1).map((i) => (
                   <Col key={i} xs={4} md={2} className="mb-3">
                     <Image
@@ -124,11 +111,13 @@ export default function ProfilePage() {
                       width={70}
                       height={70}
                       roundedCircle
-                      className={`border ${
-                        avatarIndex === i ? "border-3 border-info" : "border-secondary"
-                      } shadow-sm avatar-option`}
-                      style={{ cursor: "pointer" }}
+                      className={`avatar-option shadow-sm ${
+                        avatarIndex === i 
+                          ? "avatar-option--selected" 
+                          : "avatar-option--unselected"
+                      }`}
                       onClick={() => setAvatarIndex(i)}
+                      alt={`Avatar ${i}`}
                     />
                   </Col>
                 ))}
@@ -137,13 +126,13 @@ export default function ProfilePage() {
               <Button
                 variant="info"
                 type="submit"
-                className="w-100 mt-3 fw-semibold"
+                className="profile-card__submit-button"
               >
                 💾 Guardar cambios
               </Button>
             </Form>
           ) : (
-            <p className="text-center text-muted">Cargando perfil...</p>
+            <p className="profile-card__loading">Cargando perfil...</p>
           )}
         </Card>
       </Container>

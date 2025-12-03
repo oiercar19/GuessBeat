@@ -1,0 +1,68 @@
+.app-navbar {
+    background: linear-gradient(90deg, rgba(25, 25, 40, 1) 0%, rgba(60, 60, 120, 1) 100%);
+    min-height: 65px;
+    padding: 0.75rem 0;
+}
+
+.navbar-header-custom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.navbar-brand-custom {
+    display: flex;
+    align-items: center;
+    color: white !important;
+    font-weight: bold;
+    font-size: 1.25rem;
+    cursor: pointer;
+    margin-bottom: 0;
+}
+
+.nav-buttons-container {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.nav-btn {
+    padding: 0.25rem 0.75rem;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.avatar-mobile {
+    display: block;
+    border: 2px solid #0dcaf0; 
+    cursor: pointer;
+}
+
+@media (min-width: 992px) {
+    .avatar-mobile {
+        display: none;
+    }
+}
+
+/* Avatar desktop */
+.avatar-desktop {
+    display: none;
+    border: 2px solid #0dcaf0;
+    cursor: pointer;
+    margin-left: 0.5rem;
+}
+
+@media (min-width: 992px) {
+    .avatar-desktop {
+        display: block;
+    }
+}
+
+.navbar-right-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}

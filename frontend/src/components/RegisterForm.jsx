@@ -4,6 +4,8 @@ import { registerUser } from "../services/api";
 import { Form, Button, Card, Alert, Image } from "react-bootstrap";
 import logo from "../assets/logo2.png";
 
+import "./RegisterForm.css";
+
 export default function RegisterForm() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
@@ -26,21 +28,13 @@ export default function RegisterForm() {
   };
 
   return (
-    <Card
-      className="p-4 shadow-lg text-white"
-      style={{
-        maxWidth: "420px",
-        width: "100%",
-        background: "rgba(25,25,40,0.95)",
-        border: "1px solid rgba(255,255,255,0.1)",
-      }}
-    >
-      <div className="text-center mb-3">
+    <Card className="register-card p-4 shadow-lg text-white">
+      <div className="register-header text-center mb-3">
         <Image
           src={logo}
           width={80}
           height={80}
-          className="mb-3 border border-3 border-primary rounded-circle shadow-sm"
+          className="register-logo mb-3 rounded-circle shadow-sm"
           alt="GuessBeat Logo"
         />
         <h3 className="fw-bold">Crear Cuenta</h3>
@@ -84,11 +78,7 @@ export default function RegisterForm() {
           />
         </Form.Group>
 
-        <Button
-          variant="success"
-          type="submit"
-          className="w-100 mt-2 fw-semibold"
-        >
+        <Button variant="success" type="submit" className="w-100 mt-2 fw-semibold">
           Crear cuenta
         </Button>
       </Form>

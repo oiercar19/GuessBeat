@@ -39,7 +39,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
   res.json({
-    message: "🚪 API Gateway funcionando correctamente",
+    message: "API Gateway funcionando",
     documentation: "http://localhost:5000/api-docs",
     services: {
       users: process.env.USER_SERVICE_URL || "http://localhost:5001",

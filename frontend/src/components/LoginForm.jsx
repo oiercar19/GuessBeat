@@ -3,6 +3,7 @@ import { loginUser } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { Form, Button, Card, Alert, Image } from "react-bootstrap";
 import logo from "../assets/logo2.png";
+import "./LoginForm.css";
 
 export default function LoginForm() {
   const [username, setUsername] = useState("");
@@ -11,45 +12,35 @@ export default function LoginForm() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError(""); // limpiar errores anteriores
+    e.preventDefault();
+    setError(""); // limpiar errores anteriores
 
-  try {
-    const data = await loginUser(username, password);
+    try {
+      const data = await loginUser(username, password);
 
-    if (data.token) {
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("username", data.username);
-      navigate("/home");
-    } else {
-      setError("Credenciales incorrectas. Intenta de nuevo.");
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("username", data.username);
+        navigate("/home");
+      } else {
+        setError("Credenciales incorrectas. Intenta de nuevo.");
+      }
+    } catch (err) {
+      console.error("❌ Error al iniciar sesión:", err);
+      if (err.message.includes("401") || err.message.includes("incorrecta")) {
+        setError("Credenciales incorrectas. Intenta de nuevo.");
+      } else {
+        setError("Error al conectar con el servidor. Inténtalo más tarde.");
+      }
     }
-  } catch (err) {
-    console.error("❌ Error al iniciar sesión:", err);
-    if (err.message.includes("401") || err.message.includes("incorrecta")) {
-      setError("Credenciales incorrectas. Intenta de nuevo.");
-    } else {
-      setError("Error al conectar con el servidor. Inténtalo más tarde.");
-    }
-  }
-};
+  };
 
   return (
-    <Card
-      className="p-4 shadow-lg text-white"
-      style={{
-        maxWidth: "420px",
-        width: "100%",
-        background: "rgba(25,25,40,0.95)",
-        border: "1px solid rgba(255,255,255,0.1)",
-      }}
-    >
+    <Card className="p-4 shadow-lg text-white login-card">
       <div className="text-center mb-3">
         <Image
           src={logo}
-          width={80}
-          height={80}
-          className="mb-3 border border-3 border-primary rounded-circle shadow-sm"
+          className="mb-3 border border-3 border-primary rounded-circle shadow-sm login-logo"
           alt="GuessBeat Logo"
         />
         <h3 className="fw-bold">Iniciar Sesión</h3>
@@ -67,6 +58,7 @@ export default function LoginForm() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
+            className="custom-input"
           />
         </Form.Group>
 
@@ -78,6 +70,7 @@ export default function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            className="custom-input"
           />
         </Form.Group>
 
@@ -88,13 +81,14 @@ export default function LoginForm() {
         >
           Entrar
         </Button>
-              <Button
-        variant="warning"
-        className="w-100 mt-3 fw-semibold"
-        href="http://localhost:5001/api/auth/soundcloud/login"
-      >
-        🎧 Iniciar sesión con SoundCloud
-      </Button>
+        
+        <Button
+          variant="warning"
+          className="w-100 mt-3 fw-semibold"
+          href="http://localhost:5001/api/auth/soundcloud/login"
+        >
+          🎧 Iniciar sesión con SoundCloud
+        </Button>
       </Form>
     </Card>
   );

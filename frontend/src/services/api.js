@@ -31,7 +31,6 @@ export const loginUser = async (username, password) => {
 };
 
 export const getProfile = async () => {
-  // Obtener el token del localStorage automáticamente
   const token = localStorage.getItem("token");
 
   if (!token) {
@@ -52,7 +51,6 @@ export const getProfile = async () => {
   return res.json();
 };
 
-// --- CHAT GENERAL ---
 export const getChatMessages = async () => {
   const token = localStorage.getItem("token");
   const res = await fetch(`${API_URL}/chat`, {
@@ -106,9 +104,6 @@ export const updateProfile = async (data) => {
   return res.json();
 };
 
-// --- SERVICIOS DE JUEGO ---
-
-// 🔹 Obtener categorías
 export const getCategories = async () => {
   const res = await fetch(`${API_URL}/game/categories`);
   if (!res.ok) throw new Error("Error al obtener categorías");
@@ -141,7 +136,6 @@ export const searchSongs = async (query) => {
   return res.json();
 };
 
-// --- ADMIN ---
 export const createSong = async (songData) => {
   const token = localStorage.getItem("token");
   const res = await fetch(`${API_URL}/game/songs`, {

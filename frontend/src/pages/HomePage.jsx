@@ -4,6 +4,7 @@ import { getProfile, getCategories } from "../services/api";
 import AppNavbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Container, Spinner, Card } from "react-bootstrap";
+import "./HomePage.css";
 
 export default function HomePage() {
   const [profile, setProfile] = useState(null);
@@ -49,141 +50,57 @@ export default function HomePage() {
     initAuth();
   }, [searchParams, navigate]);
 
-  // 🖼️ Imagenes para cada categoría (usa las tuyas o links de stock)
   const categoryImages = {
-    1: "julio.webp",   // Música en español
-    2: "calendario.webp", // Adivina el Año
-    3: "70s80s.jpg",   // Años 70 y 80
+    1: "julio.webp",
+    2: "calendario.webp",
+    3: "70s80s.jpg",
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #0a0a1a, #111132, #000)",
-        color: "#fff",
-        paddingTop: "100px",
-      }}
-    >
+    <div className="home-page">
       <AppNavbar />
-      <Container className="d-flex flex-column align-items-center mt-5">
-        <Card
-          className="p-4 text-center text-white shadow-lg mb-5"
-          style={{
-            background: "rgba(25,25,40,0.9)",
-            border: "1px solid rgba(255,255,255,0.1)",
-            maxWidth: "500px",
-            borderRadius: "20px",
-          }}
-        >
+      <Container className="home-page__container">
+        <Card className="profile-card p-4 text-center text-white shadow-lg mb-5">
           {loading ? (
-            <div className="d-flex flex-column align-items-center gap-3">
+            <div className="profile-card__loading">
               <Spinner animation="border" variant="info" />
-              <p className="text-muted">Cargando perfil...</p>
+              <p className="profile-card__loading-text">Cargando perfil...</p>
             </div>
           ) : profile ? (
             <>
-              <h2 className="text-info mb-3 fw-bold">Bienvenido a GuessBeat 🎶</h2>
-              <p className="fs-5">
+              <h2 className="profile-card__title">Bienvenido a GuessBeat 🎶</h2>
+              <p className="profile-card__username">
                 Hola, <b>{profile.username}</b>
               </p>
-              <p className="fs-4 mb-0">
-                Puntos: <span className="text-warning">{profile.stats}</span>
+              <p className="profile-card__points">
+                Puntos: <span className="profile-card__points-value">{profile.stats}</span>
               </p>
             </>
           ) : (
-            <p className="text-danger">Error al cargar el perfil</p>
+            <p className="profile-card__error">Error al cargar el perfil</p>
           )}
         </Card>
 
         {!loading && categories.length > 0 && (
           <>
-            <h3 className="text-info mb-4 fw-bold text-uppercase">
-              🎮 Modos de Juego
-            </h3>
+            <h3 className="game-modes-title">🎮 Modos de Juego</h3>
 
-            <div
-              className="d-grid gap-4"
-              style={{
-                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                width: "100%",
-                maxWidth: "1000px",
-              }}
-            >
+            <div className="game-modes-grid">
               {categories.map((cat) => (
                 <div
                   key={cat.id}
                   className="game-card"
                   onClick={() => navigate(`/game/${cat.id}`)}
-                  style={{
-                    position: "relative",
-                    cursor: "pointer",
-                    overflow: "hidden",
-                    borderRadius: "12px",
-                    boxShadow: "0 0 10px rgba(0,0,0,0.6)",
-                    transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "scale(1.05)";
-                    e.currentTarget.style.boxShadow =
-                      "0 0 25px rgba(13,202,240,0.6)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "scale(1)";
-                    e.currentTarget.style.boxShadow =
-                      "0 0 10px rgba(0,0,0,0.6)";
-                  }}
                 >
-                  {/* Imagen de fondo */}
                   <img
                     src={categoryImages[cat.id] || "https://upload.wikimedia.org/wikipedia/commons/c/c9/Moon.jpg"}
                     alt={cat.name}
-                    style={{
-                      width: "100%",
-                      height: "180px",
-                      objectFit: "cover",
-                      filter: "brightness(0.6)",
-                      transition: "filter 0.3s ease",
-                    }}
-                    className="game-card-img"
+                    className="game-card__image"
                   />
 
-                  {/* Filtro y texto */}
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      width: "100%",
-                      height: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexDirection: "column",
-                      background:
-                        "linear-gradient(180deg, rgba(0,0,0,0.1), rgba(0,0,0,0.7))",
-                    }}
-                  >
-                    <h4
-                      className="fw-bold mb-1"
-                      style={{
-                        color: "#0dcaf0",
-                        textShadow: "0 0 10px rgba(13,202,240,0.8)",
-                        fontSize: "1.4rem",
-                      }}
-                    >
-                      {cat.name}
-                    </h4>
-                    <p
-                      className="small"
-                      style={{
-                        color: "#e0e0e0",
-                        textShadow: "0 0 5px rgba(0,0,0,0.8)",
-                        fontStyle: "italic",
-                      }}
-                    >
-                      {cat.description}
-                    </p>
+                  <div className="game-card__overlay">
+                    <h4 className="game-card__title">{cat.name}</h4>
+                    <p className="game-card__description">{cat.description}</p>
                   </div>
                 </div>
               ))}

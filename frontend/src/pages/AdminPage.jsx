@@ -6,6 +6,8 @@ import Footer from "../components/Footer";
 import AdminPanel from "../components/AdminPanel";
 import { Container, Spinner, Alert } from "react-bootstrap";
 
+import "./AdminPage.css";
+
 export default function AdminPage() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,12 +25,10 @@ export default function AdminPage() {
         const userData = await getProfile(token);
         setProfile(userData);
 
-        // Verificar si es admin
         if (userData.username !== "admin") {
           navigate("/home");
         }
       } catch (error) {
-        console.error("❌ Error:", error);
         localStorage.removeItem("token");
         navigate("/login");
       } finally {
@@ -40,24 +40,17 @@ export default function AdminPage() {
   }, [navigate]);
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #0a0a1a, #111132, #000)",
-        color: "#fff",
-        paddingTop: "100px",
-      }}
-    >
+    <div className="admin-page">
       <AppNavbar />
-      <Container className="d-flex flex-column align-items-center mt-5">
+      <Container className="admin-container">
         {loading ? (
-          <div className="d-flex flex-column align-items-center gap-3">
+          <div className="loading-box">
             <Spinner animation="border" variant="info" />
             <p className="text-muted">Verificando permisos...</p>
           </div>
         ) : profile && profile.username === "admin" ? (
           <>
-            <div className="text-center mb-4">
+            <div className="admin-header text-center mb-4">
               <h1 className="text-info fw-bold">⚙️ Panel de Administración</h1>
               <p className="text-muted">Gestiona las canciones de GuessBeat</p>
             </div>

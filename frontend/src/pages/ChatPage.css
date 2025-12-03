@@ -1,0 +1,37 @@
+.chat-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #111, #1a1a40, #000);
+    color: #fff;
+    margin: 0;
+    padding-top: 90px;
+    padding-bottom: 40px;
+    overflow-x: hidden;
+}
+
+.chat-container {
+    max-width: 800px;
+}
+
+.chat-form-card {
+    border-radius: 15px;
+}
+
+.chat-textarea {
+    background: #0f0f23;
+    color: #fff;
+    border: 1px solid #555;
+}
+
+.chat-textarea::placeholder {
+    color: #bbb;
+}
+
+.chat-post-card {
+    background: rgba(35, 35, 60, 0.95);
+    border-radius: 15px;
+}
+
+.chat-avatar {
+    border: 2px solid #0dcaf0;
+    box-shadow: 0 0 6px rgba(0, 255, 255, 0.3);
+}

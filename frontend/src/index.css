@@ -1,4 +1,4 @@
 ::placeholder {
-  color: #bbb !important; /* 👈 gris claro visible sobre fondo oscuro */
-  opacity: 1;
+    color: #bbb !important;
+    opacity: 1;
 }

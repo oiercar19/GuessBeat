@@ -1,0 +1,14 @@
+.app-footer {
+    background: rgba(10, 10, 30, 0.9);
+    color: #bbb;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    padding: 15px 0;
+    margin-top: 60px;
+    font-size: 0.9rem;
+}
+
+.copyright-text {
+    font-size: 0.8rem;
+    color: #666;
+}

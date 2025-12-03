@@ -1,20 +1,15 @@
 import LoginForm from "../components/LoginForm";
 import { Link } from "react-router-dom";
 import { Container } from "react-bootstrap";
+import "./LoginPage.css";
 
 export default function LoginPage() {
   return (
-    <Container
-      fluid
-      className="d-flex flex-column align-items-center justify-content-center min-vh-100"
-      style={{
-        background: "linear-gradient(135deg, #1a1a40, #2e2e72, #000)",
-      }}
-    >
+    <Container fluid className="login-page">
       <LoginForm />
-      <p className="text-light mt-4">
+      <p className="login-page__register-text">
         ¿No tienes cuenta?{" "}
-        <Link to="/register" className="text-info fw-semibold">
+        <Link to="/register" className="login-page__register-link">
           Regístrate aquí
         </Link>
       </p>

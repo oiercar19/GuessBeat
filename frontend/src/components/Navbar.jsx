@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Container, Navbar, Button, Image, Nav } from "react-bootstrap";
 import logo from "../assets/logo2.png";
+import "./Navbar.css"; 
 
 export default function AppNavbar() {
   const navigate = useNavigate();
@@ -17,21 +18,14 @@ export default function AppNavbar() {
       variant="dark"
       expand="lg"
       fixed="top"
-      className="shadow-sm"
-      style={{
-        background:
-          "linear-gradient(90deg, rgba(25,25,40,1) 0%, rgba(60,60,120,1) 100%)",
-        minHeight: "65px",
-        padding: "0.75rem 0",
-      }}
+      className="shadow-sm app-navbar"
     >
       <Container fluid>
-        <div className="d-flex align-items-center justify-content-between w-100">
+        <div className="navbar-header-custom">
           {/* Logo + título */}
           <Navbar.Brand
             href="/home"
-            className="d-flex align-items-center text-light fw-bold mb-0"
-            style={{ cursor: "pointer", fontSize: "1.25rem" }}
+            className="navbar-brand-custom"
           >
             <Image
               src={logo}
@@ -44,15 +38,14 @@ export default function AppNavbar() {
             GuessBeat
           </Navbar.Brand>
 
-          <div className="d-flex align-items-center gap-2">
+          <div className="navbar-right-section">
             {/* Avatar visible en móvil */}
             <Image
               src={`/avatars/${localStorage.getItem("avatarIndex") || 0}.jpg`}
               width="40"
               height="40"
               roundedCircle
-              className="d-lg-none border border-2 border-info"
-              style={{ cursor: "pointer" }}
+              className="avatar-mobile"
               onClick={() => navigate("/profile")}
             />
 
@@ -63,52 +56,42 @@ export default function AppNavbar() {
 
         {/* Menú colapsable */}
         <Navbar.Collapse id="navbar-nav">
-          <Nav className="ms-auto d-flex align-items-lg-center gap-2 mt-2 mt-lg-0">
-            <Button
-              variant="outline-info"
-              onClick={() => navigate("/chat")}
-              className="fw-semibold"
-              size="sm"
-              style={{ padding: "0.25rem 0.75rem", whiteSpace: "nowrap" }}
-            >
+          <Nav className="nav-buttons-container">
+            <Button variant="outline-info" onClick={() => navigate("/chat")} size="sm" className="nav-btn">
               💬 Chat
             </Button>
-            <Button
-              variant="outline-warning"
-              onClick={() => navigate("/ranking")}
-              size="sm"
-              style={{ padding: "0.25rem 0.75rem", whiteSpace: "nowrap" }}
-            >
+
+            <Button variant="outline-warning" onClick={() => navigate("/ranking")} size="sm" className="nav-btn">
               🏆 Ranking
             </Button>
+
             {localStorage.getItem("username") === "admin" && (
               <Button
                 variant="outline-success"
                 onClick={() => navigate("/admin")}
-                className="fw-semibold"
                 size="sm"
-                style={{ padding: "0.25rem 0.75rem", whiteSpace: "nowrap" }}
+                className="nav-btn"
               >
                 ⚙️ Admin
               </Button>
             )}
+
             <Button
               variant="outline-danger"
               onClick={handleLogout}
-              className="fw-semibold"
               size="sm"
-              style={{ padding: "0.25rem 0.75rem", whiteSpace: "nowrap" }}
+              className="nav-btn"
             >
               Cerrar sesión
             </Button>
-            {/* Avatar en desktop */}
+
+            {/* Avatar desktop */}
             <Image
               src={`/avatars/${localStorage.getItem("avatarIndex") || 0}.jpg`}
               width="40"
               height="40"
               roundedCircle
-              className="d-none d-lg-block border border-2 border-info ms-2"
-              style={{ cursor: "pointer" }}
+              className="avatar-desktop"
               onClick={() => navigate("/profile")}
             />
           </Nav>

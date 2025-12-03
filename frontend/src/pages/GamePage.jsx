@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { startGame, searchSongs } from "../services/api";
 import AppNavbar from "../components/Navbar";
 import { Container, Button, Form, Card, ProgressBar, ListGroup } from "react-bootstrap";
+import "./GamePage.css";
 
 export default function GamePage() {
   const { category } = useParams();
@@ -34,7 +35,6 @@ export default function GamePage() {
       const data = await startGame(category);
       setGame(data);
       
-      // Detectar si es modo "Adivina el Año" (categoría 2)
       const yearMode = category === "2";
       setIsYearMode(yearMode);
       
@@ -55,7 +55,6 @@ export default function GamePage() {
     initGame();
   }, [category]);
 
-
   useEffect(() => {
     if (iframeRef.current && window.SC && game?.permalink_url) {
       const player = window.SC.Widget(iframeRef.current);
@@ -70,7 +69,7 @@ export default function GamePage() {
       
       if (isYearMode) {
         setFeedback("🎧 Escuchando 30 segundos...");
-        setTimeout(() => widget.pause(), 30000); // 30 segundos en modo año
+        setTimeout(() => widget.pause(), 30000);
       } else {
         setFeedback("🎧 Escuchando fragmento...");
         setTimeout(() => widget.pause(), fragmentTime * 1000);
@@ -85,125 +84,123 @@ export default function GamePage() {
       if (!keepFeedback) {
         setFeedback("🎶 Reproduciendo la canción completa...");
       }
-      setTimeout(() => widget.pause(), 30000); // 🔊 30 s
+      setTimeout(() => widget.pause(), 30000);
     }
   };
 
-const skipFragment = async () => {
-  if (fragmentIndex < 4) {
-    setFragmentIndex(fragmentIndex + 1);
-    
-    if (!isYearMode) {
-      setFragmentTime(fragmentTime + 5);
-      setFeedback("⏭ Nuevo fragmento desbloqueado");
-    } else {
-      setFeedback(`⏭ Intento ${fragmentIndex + 2}/5`);
-    }
-  } else {
-    setFinished(true);
-    playFullTrack();
-
-    const username = localStorage.getItem("username");
-    try {
-      const res = await fetch("http://localhost:5001/api/users/update-stats", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, points: -8 }),
-      });
+  const skipFragment = async () => {
+    if (fragmentIndex < 4) {
+      setFragmentIndex(fragmentIndex + 1);
       
-      if (res.ok) {
-        if (isYearMode) {
-          setFeedback(`💀 Fin del juego. El año era: ${game.release_year} (-8 pts)`);
-        } else {
-          setFeedback(`💀 Fin del juego. La canción era: ${game.title} (-8 pts)`);
-        }
+      if (!isYearMode) {
+        setFragmentTime(fragmentTime + 5);
+        setFeedback("⏭ Nuevo fragmento desbloqueado");
       } else {
+        setFeedback(`⏭ Intento ${fragmentIndex + 2}/5`);
+      }
+    } else {
+      setFinished(true);
+      playFullTrack();
+
+      const username = localStorage.getItem("username");
+      try {
+        const res = await fetch("http://localhost:5001/api/users/update-stats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, points: -8 }),
+        });
+        
+        if (res.ok) {
+          if (isYearMode) {
+            setFeedback(`💀 Fin del juego. El año era: ${game.release_year} (-8 pts)`);
+          } else {
+            setFeedback(`💀 Fin del juego. La canción era: ${game.title} (-8 pts)`);
+          }
+        } else {
+          if (isYearMode) {
+            setFeedback(`💀 Fin del juego. El año era: ${game.release_year}`);
+          } else {
+            setFeedback(`💀 Fin del juego. La canción era: ${game.title}`);
+          }
+        }
+      } catch (error) {
+        console.error("⚠️ Error al restar puntos:", error);
         if (isYearMode) {
           setFeedback(`💀 Fin del juego. El año era: ${game.release_year}`);
         } else {
           setFeedback(`💀 Fin del juego. La canción era: ${game.title}`);
         }
       }
-    } catch (error) {
-      console.error("⚠️ Error al restar puntos:", error);
-      if (isYearMode) {
-        setFeedback(`💀 Fin del juego. El año era: ${game.release_year}`);
-      } else {
-        setFeedback(`💀 Fin del juego. La canción era: ${game.title}`);
-      }
     }
-  }
-};
+  };
 
-const handleGuess = async () => {
-  if (!guess.trim()) return;
+  const handleGuess = async () => {
+    if (!guess.trim()) return;
 
-  const username = localStorage.getItem("username");
-  const attempt = fragmentIndex + 1;
+    const username = localStorage.getItem("username");
+    const attempt = fragmentIndex + 1;
 
-  // Modo año: usar endpoint diferente
-  if (isYearMode) {
-    const res = await fetch(
-      `http://localhost:8002/game/check-year?release_year=${encodeURIComponent(game.release_year)}&guess=${encodeURIComponent(guess)}`,
-      {
-        method: "POST",
-        headers: {
-          "X-Username": username,
-          "X-Attempt": attempt
+    if (isYearMode) {
+      const res = await fetch(
+        `http://localhost:8002/game/check-year?release_year=${encodeURIComponent(game.release_year)}&guess=${encodeURIComponent(guess)}`,
+        {
+          method: "POST",
+          headers: {
+            "X-Username": username,
+            "X-Attempt": attempt
+          }
+        }
+      );
+      const data = await res.json();
+
+      if (data.correct) {
+        const feedbackMsg = `🎉 ¡Correcto! Era ${data.year} (+${data.points} pts)`;
+        setFeedback(feedbackMsg);
+        setFinished(true);
+        playFullTrack(true);
+      } else {
+        if (attempt >= 5) {
+          setFeedback(`❌ Incorrecto. El año era: ${data.year} (-8 pts)`);
+          setFinished(true);
+          playFullTrack();
+        } else {
+          setFragmentIndex(fragmentIndex + 1);
+          setFeedback(`❌ Incorrecto, intenta de nuevo (${attempt}/5)`);
         }
       }
-    );
-    const data = await res.json();
-
-    if (data.correct) {
-      const feedbackMsg = `🎉 ¡Correcto! Era ${data.year} (+${data.points} pts)`;
-      setFeedback(feedbackMsg);
-      setFinished(true);
-      playFullTrack(true);
     } else {
-      if (attempt >= 5) {
-        setFeedback(`❌ Incorrecto. El año era: ${data.year} (-8 pts)`);
+      const res = await fetch(
+        `http://localhost:8002/game/check?title=${encodeURIComponent(game.title)}&guess=${encodeURIComponent(guess)}`,
+        {
+          method: "POST",
+          headers: {
+            "X-Username": username,
+            "X-Attempt": attempt
+          }
+        }
+      );
+      const data = await res.json();
+
+      if (data.correct) {
+        const feedbackMsg = `🎉 ¡Correcto! Era "${data.title}" (+${data.points} pts)`;
+        console.log("📢 Estableciendo feedback:", feedbackMsg);
+        setFeedback(feedbackMsg);
         setFinished(true);
-        playFullTrack();
+        playFullTrack(true);
       } else {
-        setFragmentIndex(fragmentIndex + 1);
-        setFeedback(`❌ Incorrecto, intenta de nuevo (${attempt}/5)`);
-      }
-    }
-  } else {
-    // Modo título original
-    const res = await fetch(
-      `http://localhost:8002/game/check?title=${encodeURIComponent(game.title)}&guess=${encodeURIComponent(guess)}`,
-      {
-        method: "POST",
-        headers: {
-          "X-Username": username,
-          "X-Attempt": attempt
+        if (attempt >= 5) {
+          setFeedback(`❌ Incorrecto. La canción era: ${game.title} (-8 pts)`);
+          setFinished(true);
+          playFullTrack();
+        } else {
+          setFeedback(`❌ Incorrecto, intenta de nuevo`);
+          skipFragment();
         }
       }
-    );
-    const data = await res.json();
-
-    if (data.correct) {
-      const feedbackMsg = `🎉 ¡Correcto! Era "${data.title}" (+${data.points} pts)`;
-      console.log("📢 Estableciendo feedback:", feedbackMsg);
-      setFeedback(feedbackMsg);
-      setFinished(true);
-      playFullTrack(true);
-    } else {
-      if (attempt >= 5) {
-        setFeedback(`❌ Incorrecto. La canción era: ${game.title} (-8 pts)`);
-        setFinished(true);
-        playFullTrack();
-      } else {
-        setFeedback(`❌ Incorrecto, intenta de nuevo`);
-        skipFragment();
-      }
     }
-  }
-  setGuess("");
-  setSuggestions([]);
-};
+    setGuess("");
+    setSuggestions([]);
+  };
 
   const handleSearch = async (text) => {
     setGuess(text);
@@ -229,38 +226,23 @@ const handleGuess = async () => {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #0a0a1a, #12123a, #0a0a1a)",
-        color: "#fff",
-        paddingTop: "100px",
-      }}
-    >
+    <div className="game-page">
       <AppNavbar />
       <Container className="text-center">
         {loading ? (
-          <p className="mt-5 text-muted">Cargando partida...</p>
+          <p className="game-page__loading">Cargando partida...</p>
         ) : (
           game && (
-            <Card
-              className="bg-dark text-light p-4 shadow-lg mx-auto"
-              style={{
-                maxWidth: "700px",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: "20px",
-              }}
-            >
-              <h3 className="text-info mb-3 fw-bold">
+            <Card className="game-card bg-dark text-light p-4 shadow-lg mx-auto">
+              <h3 className="game-card__title">
                 {isYearMode ? "📅 Adivina el Año" : `🎧 Adivina la canción (${category})`}
               </h3>
 
-              {/* 🎵 Widget oculto */}
               <iframe
                 ref={iframeRef}
                 width="0"
                 height="0"
-                style={{ display: "none" }}
+                className="game-card__iframe"
                 allow="autoplay"
                 src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(
                   game.permalink_url
@@ -278,7 +260,7 @@ const handleGuess = async () => {
                 <>
                   <Button
                     variant="outline-info"
-                    className="fw-semibold px-4 py-2"
+                    className="game-card__play-button"
                     onClick={playFragment}
                   >
                     {isYearMode 
@@ -286,25 +268,17 @@ const handleGuess = async () => {
                       : `▶️ Reproducir fragmento ${fragmentIndex + 1} (${fragmentTime}s)`}
                   </Button>
 
-                  <Form className="mt-4 position-relative">
+                  <Form className="game-form">
                     <Form.Control
                       type="text"
                       placeholder={isYearMode ? "📅 ¿En qué año salió? (ej: 1991)" : "🎵 ¿Lo sabes? Escribe el título..."}
                       value={guess}
                       onChange={(e) => isYearMode ? setGuess(e.target.value) : handleSearch(e.target.value)}
-                      className="bg-dark text-white border-secondary mb-3 text-center"
-                      style={{ fontSize: "1.1rem", borderRadius: "10px" }}
+                      className="game-form__input bg-dark text-white border-secondary mb-3 text-center"
                     />
 
                     {!isYearMode && suggestions.length > 0 && (
-                      <ListGroup
-                        className="position-absolute w-100 text-start"
-                        style={{
-                          zIndex: 10,
-                          maxHeight: "200px",
-                          overflowY: "auto",
-                        }}
-                      >
+                      <ListGroup className="game-form__suggestions text-start">
                         {suggestions.map((s, idx) => (
                           <ListGroup.Item
                             key={idx}
@@ -318,10 +292,10 @@ const handleGuess = async () => {
                       </ListGroup>
                     )}
 
-                    <div className="d-flex justify-content-between mt-4">
+                    <div className="game-form__buttons">
                       <Button
                         variant="secondary"
-                        className="fw-bold px-4"
+                        className="game-form__skip-button"
                         onClick={skipFragment}
                       >
                         ⏭ SKIP
@@ -329,7 +303,7 @@ const handleGuess = async () => {
 
                       <Button
                         variant="success"
-                        className="fw-bold px-4"
+                        className="game-form__submit-button"
                         onClick={handleGuess}
                       >
                         SUBMIT ✅
@@ -339,19 +313,16 @@ const handleGuess = async () => {
                 </>
               ) : (
                 <>
-                  <div className="d-flex flex-column align-items-center mt-3">
+                  <div className="game-result">
                     <img
                       src={game.artwork}
                       alt="cover"
-                      width="150"
-                      height="150"
-                      className="rounded mb-3 shadow"
-                      style={{ objectFit: "cover" }}
+                      className="game-result__artwork shadow"
                       onError={(e) => {
                         e.target.src = "/musica.webp";
                       }}
                     />
-                    <p className="fs-5 text-center">
+                    <p className="game-result__info">
                       🎵 <strong>{game.title}</strong>
                       <br />
                       👤 {game.artist}
@@ -362,7 +333,7 @@ const handleGuess = async () => {
 
                   <Button
                     variant="info"
-                    className="mt-3 fw-bold px-4 py-2"
+                    className="game-result__restart-button"
                     onClick={restartGame}
                   >
                     🔁 Jugar otra vez
@@ -372,12 +343,11 @@ const handleGuess = async () => {
 
               {feedback && (
                 <p
-                  className={`mt-4 fw-bold ${
+                  className={`game-feedback ${
                     feedback.includes("Correcto")
-                      ? "text-success"
-                      : "text-warning"
+                      ? "game-feedback--success"
+                      : "game-feedback--warning"
                   }`}
-                  style={{ fontSize: "1.1rem" }}
                 >
                   {feedback}
                 </p>

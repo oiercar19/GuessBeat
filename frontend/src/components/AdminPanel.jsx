@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, Form, Button, Alert, Spinner } from "react-bootstrap";
 import { getCategories, createSong } from "../services/api";
+import "./AdminPanel.css";
 
 export default function AdminPanel() {
   const [categories, setCategories] = useState([]);
@@ -58,16 +59,7 @@ export default function AdminPanel() {
   };
 
   return (
-    <Card
-      className="p-4 shadow-lg mb-5"
-      style={{
-        background: "rgba(25,25,40,0.95)",
-        border: "1px solid rgba(255,255,255,0.1)",
-        borderRadius: "20px",
-        maxWidth: "700px",
-        margin: "0 auto",
-      }}
-    >
+    <Card className="p-4 shadow-lg mb-5 admin-card">
       <h3 className="text-info mb-4 fw-bold text-center">🎵 Panel de Administración</h3>
 
       {message && (
@@ -86,11 +78,7 @@ export default function AdminPanel() {
             onChange={handleChange}
             required
             placeholder="Ej: Bohemian Rhapsody"
-            style={{
-              background: "rgba(255,255,255,0.1)",
-              color: "#fff",
-              border: "1px solid rgba(255,255,255,0.2)",
-            }}
+            className="custom-input"
           />
         </Form.Group>
 
@@ -103,11 +91,7 @@ export default function AdminPanel() {
             onChange={handleChange}
             required
             placeholder="Ej: Queen"
-            style={{
-              background: "rgba(255,255,255,0.1)",
-              color: "#fff",
-              border: "1px solid rgba(255,255,255,0.2)",
-            }}
+            className="custom-input"
           />
         </Form.Group>
 
@@ -120,11 +104,7 @@ export default function AdminPanel() {
             onChange={handleChange}
             required
             placeholder="Ej: 1975"
-            style={{
-              background: "rgba(255,255,255,0.1)",
-              color: "#fff",
-              border: "1px solid rgba(255,255,255,0.2)",
-            }}
+            className="custom-input"
           />
         </Form.Group>
 
@@ -135,15 +115,11 @@ export default function AdminPanel() {
             value={formData.category_id}
             onChange={handleChange}
             required
-            style={{
-              background: "rgba(255,255,255,0.1)",
-              color: "#fff",
-              border: "1px solid rgba(255,255,255,0.2)",
-            }}
+            className="custom-input"
           >
             <option value="">Selecciona una categoría</option>
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.id} style={{ background: "#1a1a2e" }}>
+              <option key={cat.id} value={cat.id}>
                 {cat.name}
               </option>
             ))}
@@ -158,11 +134,7 @@ export default function AdminPanel() {
             value={formData.permalink_url}
             onChange={handleChange}
             placeholder="https://soundcloud.com/..."
-            style={{
-              background: "rgba(255,255,255,0.1)",
-              color: "#fff",
-              border: "1px solid rgba(255,255,255,0.2)",
-            }}
+            className="custom-input"
           />
         </Form.Group>
 
@@ -174,20 +146,15 @@ export default function AdminPanel() {
             value={formData.artwork}
             onChange={handleChange}
             placeholder="https://..."
-            style={{
-              background: "rgba(255,255,255,0.1)",
-              color: "#fff",
-              border: "1px solid rgba(255,255,255,0.2)",
-            }}
+            className="custom-input"
           />
         </Form.Group>
 
         <Button
           type="submit"
           variant="info"
-          className="w-100 fw-bold"
+          className="w-100 fw-bold custom-btn"
           disabled={loading}
-          style={{ borderRadius: "10px" }}
         >
           {loading ? (
             <>

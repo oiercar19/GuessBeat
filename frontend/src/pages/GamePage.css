@@ -1,0 +1,104 @@
+/* GamePage.css */
+
+.game-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0a0a1a, #12123a, #0a0a1a);
+    color: #fff;
+    padding-top: 100px;
+}
+
+.game-page__loading {
+    margin-top: 3rem;
+    color: #6c757d;
+}
+
+.game-card {
+    max-width: 700px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+}
+
+.game-card__title {
+    color: #17a2b8;
+    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
+.game-card__iframe {
+    display: none;
+}
+
+.game-card__play-button {
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+}
+
+.game-form {
+    margin-top: 1.5rem;
+    position: relative;
+} 
+
+.game-form__input {
+    font-size: 1.1rem;
+    border-radius: 10px;
+}
+
+.game-form__suggestions {
+    position: absolute;
+    width: 100%;
+    z-index: 10;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.game-form__buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+}
+
+.game-form__skip-button,
+.game-form__submit-button {
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+}
+
+.game-result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.game-result__artwork {
+    width: 150px;
+    height: 150px;
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+    object-fit: cover;
+}
+
+.game-result__info {
+    font-size: 1.25rem;
+    text-align: center;
+}
+
+.game-result__restart-button {
+    margin-top: 1rem;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+}
+
+.game-feedback {
+    margin-top: 1.5rem;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.game-feedback--success {
+    color: #28a745;
+}
+
+.game-feedback--warning {
+    color: #ffc107;
+}

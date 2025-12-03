@@ -5,7 +5,7 @@ dotenv.config();
 
 const TARGET = process.env.GAME_SERVICE_URL || "http://localhost:8002";
 
-console.log(`🎯 [Categories Proxy] Target: ${TARGET}`);
+console.log('[Categories Proxy] Target: ${TARGET}');
 
 /**
  * @swagger
