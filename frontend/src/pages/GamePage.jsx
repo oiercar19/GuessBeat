@@ -252,7 +252,7 @@ const handleGuess = async () => {
               }}
             >
               <h3 className="text-info mb-3 fw-bold">
-                {isYearMode ? "📅 Adivina el Año" : `🎧 Adivina la canción (${category})`}
+                {isYearMode ? "📅 Adivina el Año" : `🎧 Adivina la canción`}
               </h3>
 
               {/* 🎵 Widget oculto */}

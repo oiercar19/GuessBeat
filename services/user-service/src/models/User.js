@@ -9,18 +9,18 @@ const socialLoginSchema = new Schema({
 const userSchema = new Schema(
   {
     username: { type: String, required: true, unique: true },
-    email: { 
+    email: {
       type: String,
       required: function () {
-        // 🔹 Solo pedimos email si el usuario NO viene de un login social
+        //Solo pedimos email si el usuario NO viene de un login social
         return !(Array.isArray(this.social_login) && this.social_login.length > 0);
       },
       unique: true,
-      sparse: true, // ⚡ evita conflictos de índice único si hay usuarios sin email
+      sparse: true, //evita conflictos de índice único si hay usuarios sin email
     },
-    password: { 
-      type: String, 
-      required: function() {
+    password: {
+      type: String,
+      required: function () {
         return !(Array.isArray(this.social_login) && this.social_login.length > 0);
       }
     },

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import re
 import requests
+import os
 from collections import defaultdict, deque
 from app.db.database import get_db
 from app.db import crud
@@ -198,10 +199,6 @@ def check_guess(
     guess: str = Query(...),
     request: Request = None
 ):
-    """
-    Comprueba si el jugador ha adivinado la canción.
-    Ignora mayúsculas, espacios y guiones. Calcula puntos según el intento.
-    """
     username = request.headers.get("X-Username")  # lo manda el frontend
     attempt = int(request.headers.get("X-Attempt", 1))  # intento actual
 
@@ -254,7 +251,6 @@ def check_guess(
     points_table = {1: 10, 2: 8, 3: 6, 4: 4, 5: 2}
     points = 0
 
-    # --- Comprobación flexible ---
     # Acepta si el nombre de la canción está contenido en la respuesta (para autocompletado)
     is_correct = (
         # Coincidencia exacta del nombre de la canción
@@ -290,10 +286,10 @@ def check_guess(
     return {"correct": False, "points": points}
 
 def update_user_points(username: str, points: int):
-    """Envía una actualización de puntos al microservicio de usuarios (Node.js)."""
     try:
+        user_service_url = os.getenv("USER_SERVICE_URL", "http://localhost:5001")
         res = requests.post(
-            "http://localhost:5000/api/users/update-stats",
+            f"{user_service_url}/api/users/update-stats",
             json={"username": username, "points": points},
             timeout=5
         )
@@ -305,7 +301,6 @@ def update_user_points(username: str, points: int):
 
 @router.post("/songs")
 def create_song(song: SongCreate, db: Session = Depends(get_db)):
-    """Endpoint para que el admin añada canciones manualmente."""
     try:
         new_song = crud.add_song(
             db=db,

@@ -59,7 +59,7 @@ export default function AdminPage() {
           <>
             <div className="text-center mb-4">
               <h1 className="text-info fw-bold">⚙️ Panel de Administración</h1>
-              <p className="text-muted">Gestiona las canciones de GuessBeat</p>
+              <p>Gestiona las canciones de GuessBeat</p>
             </div>
             <AdminPanel />
           </>

@@ -11,7 +11,7 @@ export const getChatMessages = async (req, res) => {
 
     res.status(200).json(messages);
   } catch (error) {
-    console.error("❌ Error al recuperar el chat:", error);
+    console.error("Error al recuperar el chat:", error);
     res.status(500).json({ message: "Error al recuperar el chat" });
   }
 };
@@ -34,12 +34,11 @@ export const sendChatMessage = async (req, res) => {
 
     await newMessage.save();
 
-    // ✅ Al devolverlo, también incluimos username + avatarIndex
     const populatedMessage = await newMessage.populate("user", "username avatarIndex");
 
     res.status(201).json(populatedMessage);
   } catch (error) {
-    console.error("❌ Error al enviar el mensaje:", error);
+    console.error("Error al enviar el mensaje:", error);
     res.status(500).json({ message: "Error al enviar el mensaje" });
   }
 };

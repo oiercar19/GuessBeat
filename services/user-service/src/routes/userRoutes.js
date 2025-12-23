@@ -6,6 +6,7 @@ import {
   getProfile,
   updateUserProfile,
   getRanking,
+  updateStats,
 } from "../controllers/userController.js";
 import { protect } from "../middlewares/authMiddleware.js";
 
@@ -187,22 +188,49 @@ router.put("/update", protect, updateUserProfile);
  */
 router.get("/ranking", protect, getRanking);
 
-router.post("/update-stats", async (req, res) => {
-  const { username, points } = req.body;
-
-  try {
-    const user = await User.findOne({ username });
-    if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
-
-    // Asegurar que la puntuación nunca sea negativa
-    user.stats = Math.max(0, (user.stats || 0) + points);
-    await user.save();
-
-    res.json({ message: "Puntos actualizados", newStats: user.stats });
-  } catch (error) {
-    console.error("Error al actualizar stats:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
-  }
-});
+/**
+ * @swagger
+ * /users/update-stats:
+ *   post:
+ *     summary: Actualizar estadísticas de un usuario
+ *     tags: [Usuarios]
+ *     description: Actualiza los puntos de un usuario. La puntuación nunca puede ser negativa.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - points
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: "player123"
+ *               points:
+ *                 type: number
+ *                 example: 100
+ *                 description: Puntos a añadir (pueden ser positivos o negativos)
+ *     responses:
+ *       200:
+ *         description: Puntos actualizados correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Puntos actualizados"
+ *                 newStats:
+ *                   type: number
+ *                   example: 1600
+ *       404:
+ *         description: Usuario no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post("/update-stats", updateStats);
 
 export default router;

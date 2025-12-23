@@ -5,7 +5,7 @@ dotenv.config();
 
 const TARGET = process.env.USER_SERVICE_URL || "http://localhost:5001";
 
-console.log(`🎯 [Chat Proxy] Target: ${TARGET}`);
+console.log('[Chat Proxy] Target: ${TARGET}');
 
 /**
  * @swagger
@@ -76,11 +76,11 @@ const chatProxy = createProxyMiddleware({
   },
 
   onProxyRes: (proxyRes, req) => {
-    console.log(`✅ [Proxy] Response ${proxyRes.statusCode} from ${req.originalUrl}`);
+    console.log('[Proxy] Response ${proxyRes.statusCode} from ${req.originalUrl}');
   },
 
   onError: (err, req, res) => {
-    console.error(`❌ [Proxy] Error: ${err.message}`);
+    console.error('[Proxy] Error: ${err.message}');
     if (!res.headersSent) {
       res.status(502).json({
         error: "No se pudo conectar con el servicio de usuarios",

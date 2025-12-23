@@ -6,7 +6,6 @@ export const registerUser = async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
-    // Comprobar si ya existe usuario o email
     const userExists = await User.findOne({
       $or: [{ username }, { email }]
     });
@@ -22,7 +21,7 @@ export const registerUser = async (req, res) => {
       username,
       email,
       password: hashedPassword,
-      avatarIndex: 0, // 🔹 campo preparado para futuro sistema de avatares
+      avatarIndex: 0,
     });
 
     res.status(201).json({
@@ -33,7 +32,7 @@ export const registerUser = async (req, res) => {
       token: generateToken(user._id),
     });
   } catch (error) {
-    console.error("❌ Error en registro:", error);
+    console.error("Error en registro:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -74,14 +73,11 @@ export const getRanking = async (req, res) => {
 
     res.json(users);
   } catch (error) {
-    console.error("❌ Error al obtener ranking:", error);
+    console.error("Error al obtener ranking:", error);
     res.status(500).json({ message: "Error al obtener ranking" });
   }
 };
 
-/**
- * Actualizar usuario (username, email, password, avatar)
- */
 export const updateUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
@@ -93,7 +89,6 @@ export const updateUserProfile = async (req, res) => {
     if (email) user.email = email;
     if (password) user.password = await bcrypt.hash(password, 10);
 
-    // 🧠 Solo permitir comprar avatares si tiene puntos suficientes
     if (avatarIndex !== undefined && avatarIndex !== user.avatarIndex) {
       const cost = 500;
       if (user.stats >= cost) {
@@ -115,7 +110,25 @@ export const updateUserProfile = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("❌ Error al actualizar perfil:", error);
+    console.error("Error al actualizar perfil:", error);
     res.status(500).json({ message: "Error al actualizar perfil" });
+  }
+};
+
+export const updateStats = async (req, res) => {
+  const { username, points } = req.body;
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+
+    // Asegurar que la puntuación nunca sea negativa
+    user.stats = Math.max(0, (user.stats || 0) + points);
+    await user.save();
+
+    res.json({ message: "Puntos actualizados", newStats: user.stats });
+  } catch (error) {
+    console.error("Error al actualizar stats:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };

@@ -22,7 +22,7 @@ def startup_event():
 
 @app.get("/")
 def root():
-    return {"message": "🎮 Servicio de juego activo con MySQL"}
+    return {"message": "Servicio de juego activo con MySQL"}
 
 app.include_router(categories.router, prefix="/categories", tags=["Categories"])
 app.include_router(game.router, prefix="/game", tags=["Game"])

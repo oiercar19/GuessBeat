@@ -107,8 +107,6 @@ export const updateProfile = async (data) => {
 };
 
 // --- SERVICIOS DE JUEGO ---
-
-// 🔹 Obtener categorías
 export const getCategories = async () => {
   const res = await fetch(`${API_URL}/game/categories`);
   if (!res.ok) throw new Error("Error al obtener categorías");
