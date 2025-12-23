@@ -50,8 +50,8 @@ El proyecto sigue una arquitectura de microservicios con los siguientes componen
 │(Node.js)    │ │  (Python)  │   │ MongoDB    │
 │             │ │            │   │ :27017     │
 └─────────────┘ └────────────┘   │ MySQL      │
-                                  │ :3307      │
-                                  └────────────┘
+                                 │ :3307      │
+                                 └────────────┘
 ```
 
 ### Microservicios:
