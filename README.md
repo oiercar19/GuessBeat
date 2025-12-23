@@ -44,14 +44,14 @@ El proyecto sigue una arquitectura de microservicios con los siguientes componen
        │
        ├───────────────┬─────────────────┐
        │               │                 │
-┌──────▼──────┐ ┌─────▼──────┐   ┌─────▼──────┐
-│User Service │ │Game Service│   │  Databases │
-│  :5001      │ │  :8002     │   │            │
-│(Node.js)    │ │  (Python)  │   │ MongoDB    │
-│             │ │            │   │ :27017     │
-└─────────────┘ └────────────┘   │ MySQL      │
-                                 │ :3307      │
-                                 └────────────┘
+┌──────▼──────┐  ┌─────▼──────┐    ┌─────▼──────┐
+│User Service │  │Game Service│    │  Databases │
+│  :5001      │  │  :8002     │    │            │
+│(Node.js)    │  │  (Python)  │    │ MongoDB    │
+│             │  │            │    │ :27017     │
+└─────────────┘  └────────────┘    │ MySQL      │
+                                   │ :3307      │
+                                   └────────────┘
 ```
 
 ### Microservicios:
