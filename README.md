@@ -16,6 +16,7 @@ GuessBeat es una plataforma de juego musical interactiva donde los usuarios comp
 - [Variables de Entorno](#-variables-de-entorno)
 - [Puertos](#-puertos)
 - [Características](#-características)
+- [Capturas de Pantalla](#-capturas-de-pantalla)
 
 ## 🎮 Descripción
 
@@ -451,6 +452,33 @@ Cada servicio expone documentación Swagger/OpenAPI:
 
 ---
 
+## 📸 Capturas de Pantalla
+
+### Vista Principal
+![Vista Principal](demo-img/mainview.png)
+
+### Juego
+![Pantalla de Juego](demo-img/game.png)
+
+### Resultados del Juego
+![Resultados del Juego](demo-img/game_result.png)
+
+### Juego por Año
+![Juego por Año](demo-img/year_game.png)
+
+### Ranking
+![Ranking de Jugadores](demo-img/ranking.png)
+
+### Chat
+![Chat en Vivo](demo-img/chat.png)
+
+### Panel de Administración
+![Panel de Administración](demo-img/admin.png)
+
+### Editar Perfil
+![Editar Usuario](demo-img/editaruser.png)
+
+---
 
 ## 🐛 Troubleshooting
 
